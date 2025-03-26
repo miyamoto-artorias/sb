@@ -3,7 +3,6 @@ package com.demo.sb.controllers;
 
 import com.demo.sb.entity.Course;
 import com.demo.sb.service.CourseService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +16,7 @@ public class CourseController {
     private CourseService courseService;
 
     @PostMapping
-    public ResponseEntity<Course> createCourse(@Valid @RequestBody Course course, @RequestParam int teacherId) {
+    public ResponseEntity<Course> createCourse( @RequestBody Course course, @RequestParam int teacherId) {
         Course savedCourse = courseService.createCourse(course, teacherId);
         return ResponseEntity.ok(savedCourse);
     }

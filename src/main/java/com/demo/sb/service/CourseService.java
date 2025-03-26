@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+
 @Service
 public class CourseService {
     @Autowired
@@ -32,5 +33,9 @@ public class CourseService {
 
     public List<Course> getCoursesByTeacher(int teacherId) {
         return courseRepository.findByTeacherId(teacherId);
+    }
+
+    public Optional<Course> findById(int id) {
+        return courseRepository.findById(id);
     }
 }
