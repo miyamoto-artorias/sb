@@ -8,6 +8,7 @@ import java.util.List;
 
 @Entity
 @Data
+@Table(name = "users") // Rename table to "users"
 @Inheritance(strategy = InheritanceType.JOINED) // For inheritance with Teacher and Student
 public class User {
     @Id
