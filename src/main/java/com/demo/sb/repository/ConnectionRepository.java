@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface ConnectionRepository extends JpaRepository<Connection, Integer> {
     List<Connection> findByUser1IdOrUser2Id(int user1Id, int user2Id);
+
 }
