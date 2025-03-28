@@ -32,4 +32,8 @@ public class User {
     )
     private List<Course> enrolledCourses;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, optional = true)
+    private Card card; // The single card owned by this user
+
+
 }

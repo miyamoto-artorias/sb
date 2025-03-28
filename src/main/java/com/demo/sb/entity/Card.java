@@ -15,4 +15,13 @@ public class Card {
     private String password;
 
     private boolean valid;
+
+    private float balance;
+
+
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user; // The owner of the card
+
 }
