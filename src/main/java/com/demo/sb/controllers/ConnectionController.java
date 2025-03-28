@@ -17,15 +17,15 @@ public class ConnectionController {
     @Autowired
     private ConnectionService connectionService;
 
-    @PostMapping
-    public ResponseEntity<Connection> createConnection(@Valid @RequestBody Connection connection) {
-        Connection savedConnection = connectionService.createConnection(connection); // Assume this method exists
-        return ResponseEntity.ok(savedConnection);
+
+    @PostMapping("/{user1Id}/{user2Id}")
+    public ResponseEntity<Connection> createConnection(@PathVariable int user1Id, @PathVariable int user2Id) {
+        return ResponseEntity.ok(connectionService.createConnection(user1Id, user2Id));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Connection> getConnectionById(@PathVariable int id) {
-        Optional<Connection> connection = connectionService.findById(id); // Assume this method exists
+        Optional<Connection> connection = Optional.ofNullable(connectionService.findById(id)); // Assume this method exists
         return connection.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 

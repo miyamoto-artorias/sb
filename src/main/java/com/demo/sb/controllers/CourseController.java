@@ -15,10 +15,11 @@ public class CourseController {
     @Autowired
     private CourseService courseService;
 
-    @PostMapping
-    public ResponseEntity<Course> createCourse( @RequestBody Course course, @RequestParam int teacherId) {
-        Course savedCourse = courseService.createCourse(course, teacherId);
-        return ResponseEntity.ok(savedCourse);
+
+
+    @PostMapping("/{teacherId}")
+    public ResponseEntity<Course> createCourse(@RequestBody Course course, @PathVariable int teacherId) {
+        return ResponseEntity.ok(courseService.createCourse(course, teacherId));
     }
 
     @GetMapping("/teacher/{teacherId}")

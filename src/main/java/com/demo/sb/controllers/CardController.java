@@ -16,15 +16,17 @@ public class CardController {
     @Autowired
     private CardService cardService;
 
-    @PostMapping
-    public ResponseEntity<Card> createCard(@Valid @RequestBody Card card) {
-        Card savedCard = cardService.createCard(card); // Assume this method exists
-        return ResponseEntity.ok(savedCard);
+    @PostMapping("/{userId}")
+    public ResponseEntity<Card> createCard(@RequestBody Card card, @PathVariable int userId) {
+        return ResponseEntity.ok(cardService.createCard(card, userId));
     }
 
+
+
+
     @GetMapping("/{id}")
-    public ResponseEntity<Card> getCardById(@PathVariable int id) {
-        Optional<Card> card = cardService.findById(id); // Assume this method exists
-        return card.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<Card> getCard(@PathVariable int id) {
+        return ResponseEntity.ok(cardService.getCard(id));
     }
+
 }

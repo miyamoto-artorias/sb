@@ -16,15 +16,21 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
-    @PostMapping
-    public ResponseEntity<Comment> createComment(@Valid @RequestBody Comment comment) {
-        Comment savedComment = commentService.createComment(comment); // Assume this method exists
-        return ResponseEntity.ok(savedComment);
+
+
+    @PostMapping("/{postId}/{authorId}") //why whould it have authorId ??
+    public ResponseEntity<Comment> createComment(
+            @RequestBody Comment comment,
+            @PathVariable int postId,
+            @PathVariable int authorId,
+            @RequestParam(required = false) Integer parentId) {
+        return ResponseEntity.ok(commentService.createComment(comment, postId, authorId, parentId));
     }
 
-    @GetMapping("/{id}")
+
+@GetMapping("/{id}")
     public ResponseEntity<Comment> getCommentById(@PathVariable int id) {
-        Optional<Comment> comment = commentService.findById(id); // Assume this method exists
+        Optional<Comment> comment = Optional.ofNullable(commentService.findById(id)); // Assume this method exists
         return comment.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 

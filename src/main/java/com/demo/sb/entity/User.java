@@ -24,6 +24,7 @@ public class User {
     private String email;
 
     // Common course enrollment for both Teachers and Students
+    
     @ManyToMany
     @JoinTable(
             name = "user_course_enrollment",

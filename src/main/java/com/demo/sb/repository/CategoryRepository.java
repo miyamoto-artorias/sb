@@ -12,4 +12,7 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
     @Query("SELECT c FROM Course c JOIN c.categories cat WHERE cat.id = :categoryId")
     List<Course> findCoursesByCategoryId(int categoryId);
 
+
+
+
 }
