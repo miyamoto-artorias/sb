@@ -4,6 +4,8 @@ package com.demo.sb.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Data
 @Inheritance(strategy = InheritanceType.JOINED) // For inheritance with Teacher and Student
@@ -20,4 +22,14 @@ public class User {
 
     @Column(nullable = false, unique = true)
     private String email;
+
+    // Common course enrollment for both Teachers and Students
+    @ManyToMany
+    @JoinTable(
+            name = "user_course_enrollment",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "course_id")
+    )
+    private List<Course> enrolledCourses;
+
 }

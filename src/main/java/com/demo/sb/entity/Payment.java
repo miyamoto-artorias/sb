@@ -26,4 +26,8 @@ public class Payment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id")
     private Teacher receiver;
+    //To query all payments a teacher received with your current setup:
+    //Use a JPQL query: "SELECT p FROM Payment p WHERE p.receiver = :teacher".
+
+
 }

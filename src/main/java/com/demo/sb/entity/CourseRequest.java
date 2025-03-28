@@ -4,6 +4,8 @@ package com.demo.sb.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Data
 @Table(name = "course_request")
@@ -21,10 +23,17 @@ public class CourseRequest {
     private Teacher teacher;
 
     private String subject;
-
+/*
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
-    private Category category;
+    private Category category; */
+    @ManyToMany
+    @JoinTable(name = "course_request_category",
+               joinColumns = @JoinColumn(name = "course_request_id"),
+               inverseJoinColumns = @JoinColumn(name = "category_id")
+                )
+private List<Category> categories; // Changed from 'category' to 'categories'
+
 
     private float price;
 

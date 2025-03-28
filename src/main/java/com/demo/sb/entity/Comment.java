@@ -18,6 +18,8 @@ public class Comment {
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
+
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
@@ -27,7 +29,7 @@ public class Comment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    private Comment parent;
+    private Comment parent;  //don't bother with recursion
 
     private LocalDateTime created;
 
