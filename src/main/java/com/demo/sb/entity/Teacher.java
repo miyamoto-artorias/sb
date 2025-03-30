@@ -1,6 +1,7 @@
 package com.demo.sb.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,6 +19,7 @@ public class Teacher extends User {
     private List<String> expertise;
 
     @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL)
+    @JsonManagedReference // Add this to the "parent" side
     private List<Course> uploadedCourses;
 
     private float totalEarnings; // New field for total money made

@@ -2,6 +2,7 @@ package com.demo.sb.controllers;
 
 
 import com.demo.sb.entity.User;
+import com.demo.sb.entity.UserType;
 import com.demo.sb.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,20 @@ import java.util.Optional;
 public class UserController {
     @Autowired
     private UserService userService;
+
+    @PostMapping("/teachers")
+    public ResponseEntity<User> createTeacher(@Valid @RequestBody User user) {
+        user.setUserType(UserType.TEACHER); // Using enum
+        User savedUser = userService.createUser(user);
+        return ResponseEntity.ok(savedUser);
+    }
+
+    @PostMapping("/students")
+    public ResponseEntity<User> createStudent(@Valid @RequestBody User user) {
+        user.setUserType(UserType.STUDENT); // Using enum
+        User savedUser = userService.createUser(user);
+        return ResponseEntity.ok(savedUser);
+    }
 
     @PostMapping
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) {

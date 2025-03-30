@@ -1,6 +1,7 @@
 package com.demo.sb.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -14,6 +15,11 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_type", nullable = false)
+    private UserType userType; // TEACHER, STUDENT, or ADMIN
+
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -35,6 +41,7 @@ public class User {
     private List<Course> enrolledCourses;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, optional = true)
+    @JsonManagedReference // Add this to the "parent" side
     private Card card; // The single card owned by this user
 
 
