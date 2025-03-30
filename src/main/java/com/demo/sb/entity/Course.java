@@ -2,6 +2,7 @@ package com.demo.sb.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -29,6 +30,7 @@ public class Course {
     private Teacher teacher;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+    @JsonManagedReference // Add this to the "parent" side
     private List<MaterialSupport> docs;
 /*
     @ManyToOne(fetch = FetchType.LAZY)
@@ -44,9 +46,11 @@ private List<Category> categories; // Changed from 'category' to 'categories'
 
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+    @JsonManagedReference // Add this to the "parent" side
     private List<QCM> quizzes;
-
+    /*
     @OneToMany(mappedBy = "course")
-    private List<Enrollment> enrollments;
+    @JsonManagedReference // Add this to the "parent" side
+    private List<Enrollment> enrollments; */
 
 }

@@ -1,6 +1,8 @@
 package com.demo.sb.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -31,14 +33,15 @@ public class User {
     private String email;
 
     // Common course enrollment for both Teachers and Students
-    
+    /*
     @ManyToMany
     @JoinTable(
             name = "user_course_enrollment",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "course_id")
     )
-    private List<Course> enrolledCourses;
+    @JsonIgnore  // Prevents serialization of this property
+    private List<Course> enrolledCourses; */
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, optional = true)
     @JsonManagedReference // Add this to the "parent" side

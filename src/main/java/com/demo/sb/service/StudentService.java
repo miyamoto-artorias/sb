@@ -28,15 +28,15 @@ public class StudentService {
     public Optional<Student> findById(int id) {
         return studentRepository.findById(id);
     }
-
+/*
     public List<Course> getEnrolledCourses(int studentId) {
         Optional<Student> student = studentRepository.findById(studentId);
         if (student.isPresent()) {
             return student.get().getEnrolledCourses();
         }
         throw new RuntimeException("Student not found");
-    }
-
+    } */
+    /*
     @Transactional
     public void enrollInCourse(int studentId, int courseId) {
         Optional<Student> student = studentRepository.findById(studentId);
@@ -47,5 +47,5 @@ public class StudentService {
         } else {
             throw new RuntimeException("Student or Course not found");
         }
-    }
+    } */
 }

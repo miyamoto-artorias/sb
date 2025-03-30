@@ -28,16 +28,16 @@ public class StudentController {
         Optional<Student> student = studentService.findById(id); // Assume this method exists
         return student.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
-
+    /*
     @GetMapping("/{id}/courses")
     public ResponseEntity<List<Course>> getStudentCourses(@PathVariable int id) {
         List<Course> courses = studentService.getEnrolledCourses(id); // Assume this method exists
         return ResponseEntity.ok(courses);
-    }
-
+    } */
+    /*
     @PostMapping("/{id}/enroll/{courseId}")
     public ResponseEntity<Void> enrollInCourse(@PathVariable int id, @PathVariable int courseId) {
         studentService.enrollInCourse(id, courseId); // Assume this method exists
         return ResponseEntity.ok().build();
-    }
+    }*/
 }
