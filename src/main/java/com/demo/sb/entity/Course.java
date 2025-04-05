@@ -29,9 +29,7 @@ public class Course {
     @JsonBackReference // Add this to the "child" side
     private Teacher teacher;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
-    @JsonManagedReference // Add this to the "parent" side
-    private List<MaterialSupport> docs;
+
 /*
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
@@ -52,5 +50,10 @@ private List<Category> categories; // Changed from 'category' to 'categories'
     @OneToMany(mappedBy = "course")
     @JsonManagedReference // Add this to the "parent" side
     private List<Enrollment> enrollments; */
+
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<CourseChapter> chapters;
 
 }
