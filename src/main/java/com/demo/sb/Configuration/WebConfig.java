@@ -60,7 +60,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }
-
+/*
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -84,7 +84,18 @@ public class WebConfig implements WebMvcConfigurer {
                 .csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
-    }
+    }*/
+@Bean
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+            .authorizeHttpRequests(auth -> auth
+                    .anyRequest().permitAll() // Allow ALL requests without auth
+            )
+            .csrf(AbstractHttpConfigurer::disable); // Disable CSRF for simplicity
+
+    return http.build();
+}
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
