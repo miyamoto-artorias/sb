@@ -16,8 +16,8 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+  //  @Autowired
+  //  private PasswordEncoder passwordEncoder;
 
 
 
@@ -26,12 +26,18 @@ public class UserService {
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
-
     @Transactional
+    public User createUser(User user) {
+        // Save plain text password directly
+        // user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(user);
+    }
+
+    /*@Transactional
     public User createUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword())); // Hash password
         return userRepository.save(user);
-    }
+    } */
 /* //same thing as above but withou encoding
     public User createUser(User user) {
         return userRepository.save(user);

@@ -30,7 +30,21 @@ public class EnrollmentService {
         this.courseRepository = courseRepository;
     }
 
-    @Transactional
+
+    /*public List<Enrollment> getAllEnrollments() {
+        return enrollmentRepository.findAll();
+    } */
+
+    // Update method names to match repository
+    public List<Enrollment> getEnrollmentsByUserId(Integer userId) {
+        return enrollmentRepository.findByUser_Id(userId);
+    }
+
+    public List<Enrollment> getEnrollmentsByCourseId(Integer courseId) {
+        return enrollmentRepository.findByCourse_Id(courseId);
+    }
+
+        @Transactional
     public Enrollment createEnrollment(Integer userId, Integer courseId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -46,21 +60,19 @@ public class EnrollmentService {
         return enrollmentRepository.save(enrollment);
     }
 
+    @Transactional(readOnly = true)
     public List<Enrollment> getAllEnrollments() {
-        return enrollmentRepository.findAll();
+        return enrollmentRepository.findAllWithUserAndCourseIds();
     }
+
+
+
 
     public Optional<Enrollment> getEnrollmentById(Integer id) {
         return enrollmentRepository.findById(id);
     }
 
-    public List<Enrollment> getEnrollmentsByUserId(Integer userId) {
-        return enrollmentRepository.findByUserId(userId);
-    }
 
-    public List<Enrollment> getEnrollmentsByCourseId(Integer courseId) {
-        return enrollmentRepository.findByCourseId(courseId);
-    }
 
     @Transactional
     public Enrollment updateProgress(Integer enrollmentId, float progress) {

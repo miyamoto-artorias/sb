@@ -18,13 +18,13 @@ public class EnrollmentController {
 
 
     @PostMapping
-    public ResponseEntity<Enrollment> createEnrollment(@RequestBody Enrollment enrollment) {
-        Enrollment createdEnrollment = enrollmentService.createEnrollment(
-                enrollment.getUser().getId(),
-                enrollment.getCourse().getId()
-        );
+    public ResponseEntity<Enrollment> createEnrollment(
+            @RequestParam Integer userId,
+            @RequestParam Integer courseId) {
+        Enrollment createdEnrollment = enrollmentService.createEnrollment(userId, courseId);
         return new ResponseEntity<>(createdEnrollment, HttpStatus.CREATED);
     }
+
 
     @GetMapping
     public ResponseEntity<List<Enrollment>> getAllEnrollments() {

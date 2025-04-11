@@ -1,5 +1,6 @@
 package com.demo.sb.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -17,12 +18,23 @@ public class Enrollment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
+    @JsonIgnore
     private Course course;
 
     private float progress; // Progress specific to this course for this user
     private int points;    // Points specific to this course (optional)
+
+    public Integer getUserId() {
+        return user != null ? user.getId() : null;
+    }
+
+    public Integer getCourseId() {
+        return course != null ? course.getId() : null;
+    }
+
 }
