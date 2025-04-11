@@ -23,6 +23,10 @@ public class CardService {
         card.setUser(user);
         return cardRepository.save(card);
     }
+    public Card getCardByUserId(int userId) {
+        return cardRepository.findByUser_Id(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Card not found for user ID: " + userId));
+    }
 
     public Card getCard(int id) {
         return cardRepository.findById(id)

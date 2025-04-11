@@ -3,6 +3,7 @@ package com.demo.sb.controllers;
 
 import com.demo.sb.entity.Card;
 import com.demo.sb.service.CardService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,14 @@ public class CardController {
         return ResponseEntity.ok(cardService.createCard(card, userId));
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Card> getCardByUserId(@PathVariable int userId) {
+        try {
+            return ResponseEntity.ok(cardService.getCardByUserId(userId));
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
 
 
