@@ -18,12 +18,14 @@ public class EnrollmentController {
 
 
     @PostMapping
-    public ResponseEntity<Enrollment> createEnrollment(
-            @RequestParam Integer userId,
-            @RequestParam Integer courseId) {
-        Enrollment createdEnrollment = enrollmentService.createEnrollment(userId, courseId);
+    public ResponseEntity<Enrollment> createEnrollment(@RequestBody EnrollmentRequest request) {
+        Enrollment createdEnrollment = enrollmentService.createEnrollment(
+                request.getUserId(),
+                request.getCourseId()
+        );
         return new ResponseEntity<>(createdEnrollment, HttpStatus.CREATED);
     }
+
 
 
     @GetMapping
@@ -77,6 +79,16 @@ public class EnrollmentController {
     @Autowired
     public EnrollmentController(EnrollmentService enrollmentService) {
         this.enrollmentService = enrollmentService;
+    }
+    public static class EnrollmentRequest {
+        private Integer userId;
+        private Integer courseId;
+
+        // Getters and setters
+        public Integer getUserId() { return userId; }
+        public void setUserId(Integer userId) { this.userId = userId; }
+        public Integer getCourseId() { return courseId; }
+        public void setCourseId(Integer courseId) { this.courseId = courseId; }
     }
 
 

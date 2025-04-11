@@ -3,6 +3,7 @@ package com.demo.sb.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -37,4 +38,14 @@ public class Enrollment {
         return course != null ? course.getId() : null;
     }
 
+    // Add these fields for request/response handling
+    @Transient
+    @JsonProperty("userId")
+    private Integer userId;
+
+    @Transient
+    @JsonProperty("courseId")
+    private Integer courseId;
 }
+
+
