@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/enrollments")
@@ -18,12 +19,17 @@ public class EnrollmentController {
 
 
     @PostMapping
-    public ResponseEntity<Enrollment> createEnrollment(@RequestBody EnrollmentRequest request) {
-        Enrollment createdEnrollment = enrollmentService.createEnrollment(
-                request.getUserId(),
-                request.getCourseId()
-        );
-        return new ResponseEntity<>(createdEnrollment, HttpStatus.CREATED);
+    public ResponseEntity<?> createEnrollment(@RequestBody EnrollmentRequest request) {
+        try {
+            Enrollment createdEnrollment = enrollmentService.createEnrollment(
+                    request.getUserId(),
+                    request.getCourseId()
+            );
+            return new ResponseEntity<>(createdEnrollment, HttpStatus.CREATED);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", ex.getMessage()));
+        }
     }
 
 

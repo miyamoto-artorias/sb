@@ -18,5 +18,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     @Query("SELECT e FROM Enrollment e JOIN FETCH e.user JOIN FETCH e.course")
     List<Enrollment> findAllWithUserAndCourseIds();
 
+    boolean existsByUser_IdAndCourse_Id(Integer userId, Integer courseId);
 
 }

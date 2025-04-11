@@ -30,22 +30,13 @@ public class EnrollmentService {
         this.courseRepository = courseRepository;
     }
 
-
-    /*public List<Enrollment> getAllEnrollments() {
-        return enrollmentRepository.findAll();
-    } */
-
-    // Update method names to match repository
-    public List<Enrollment> getEnrollmentsByUserId(Integer userId) {
-        return enrollmentRepository.findByUser_Id(userId);
-    }
-
-    public List<Enrollment> getEnrollmentsByCourseId(Integer courseId) {
-        return enrollmentRepository.findByCourse_Id(courseId);
-    }
-
-        @Transactional
+    @Transactional
     public Enrollment createEnrollment(Integer userId, Integer courseId) {
+        // Check for existing enrollment first
+        if (enrollmentRepository.existsByUser_IdAndCourse_Id(userId, courseId)) {
+            throw new IllegalArgumentException("User is already enrolled in this course");
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         Course course = courseRepository.findById(courseId)
@@ -59,6 +50,19 @@ public class EnrollmentService {
 
         return enrollmentRepository.save(enrollment);
     }
+    /*public List<Enrollment> getAllEnrollments() {
+        return enrollmentRepository.findAll();
+    } */
+
+    // Update method names to match repository
+    public List<Enrollment> getEnrollmentsByUserId(Integer userId) {
+        return enrollmentRepository.findByUser_Id(userId);
+    }
+
+    public List<Enrollment> getEnrollmentsByCourseId(Integer courseId) {
+        return enrollmentRepository.findByCourse_Id(courseId);
+    }
+
 
     @Transactional(readOnly = true)
     public List<Enrollment> getAllEnrollments() {
