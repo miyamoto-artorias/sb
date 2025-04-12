@@ -34,5 +34,9 @@ public class CourseService {
         return courseRepository.findByTeacherId(teacherId);
     }
 
+    public Course getCourseById(int id) {
+        return courseRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Course not found with ID: " + id));
+    }
 
 }
