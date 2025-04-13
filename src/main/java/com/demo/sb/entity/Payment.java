@@ -1,6 +1,5 @@
 package com.demo.sb.entity;
 
-
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -25,12 +24,9 @@ public class Payment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id")
-    private Teacher receiver;
-    //To query all payments a teacher received with your current setup:
-    //Use a JPQL query: "SELECT p FROM Payment p WHERE p.receiver = :teacher".
+    private User receiver; // Changed from Teacher to User
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "card_id")
     private Card card; // The card used for this payment
-
 }

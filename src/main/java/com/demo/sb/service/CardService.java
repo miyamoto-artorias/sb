@@ -33,4 +33,12 @@ public class CardService {
         return cardRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Card not found"));
     }
+
+    @Transactional
+    public Card updateCardBalance(int cardId, float amount) {
+        Card card = getCard(cardId);
+        card.setBalance(card.getBalance() + amount);
+        return cardRepository.save(card);
+    }
+
 }

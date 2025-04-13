@@ -2,6 +2,7 @@ package com.demo.sb.service;
 
 import com.demo.sb.entity.Card;
 import com.demo.sb.entity.Payment;
+import com.demo.sb.entity.User;
 import com.demo.sb.repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,24 +21,33 @@ public class PaymentService {
 
     @Transactional
     public Payment createPayment(Payment payment) {
-        if (payment.getCard() == null) {
-            throw new IllegalArgumentException("Payment must be associated with a card");
+        // Validate payment
+        if (payment.getCard() == null || payment.getReceiver() == null) {
+            throw new IllegalArgumentException("Payment must have a card and receiver");
         }
 
-        int cardId = payment.getCard().getId();
-        Card dbCard = cardService.getCard(cardId);
+        // Get payer's card
+        Card payerCard = cardService.getCard(payment.getCard().getId());
 
-        if (dbCard.getBalance() < payment.getAmount()) {
+        // Get receiver's card from user
+        User receiver = payment.getReceiver();
+        Card receiverCard = cardService.getCardByUserId(receiver.getId()); // Fetch card by user ID
+
+        // Check payer balance
+        if (payerCard.getBalance() < payment.getAmount()) {
             payment.setStatus("failed");
             payment.setDate(LocalDateTime.now());
-            payment.setCard(dbCard);
             return paymentRepository.save(payment);
         }
 
-        dbCard.setBalance(dbCard.getBalance() - payment.getAmount());
+        // Perform balance transfers
+        cardService.updateCardBalance(payerCard.getId(), -payment.getAmount());
+        cardService.updateCardBalance(receiverCard.getId(), payment.getAmount());
+
+        // Update payment status
         payment.setStatus("completed");
         payment.setDate(LocalDateTime.now());
-        payment.setCard(dbCard);
+        payment.setCard(payerCard); // Ensure full card object is persisted
 
         return paymentRepository.save(payment);
     }

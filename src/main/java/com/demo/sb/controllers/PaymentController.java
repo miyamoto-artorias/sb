@@ -16,7 +16,7 @@ public class PaymentController {
     @Autowired
     private PaymentService paymentService;
 
-    @PostMapping("")  // 👈 Add empty path mapping
+    @PostMapping("")
     public ResponseEntity<?> createPayment(@Valid @RequestBody Payment payment) {
         try {
             Payment savedPayment = paymentService.createPayment(payment);
