@@ -28,6 +28,7 @@ public class CardService {
                 .orElseThrow(() -> new EntityNotFoundException("Card not found for user ID: " + userId));
     }
 
+
     public Card getCard(int id) {
         return cardRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Card not found"));
