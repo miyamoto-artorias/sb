@@ -39,4 +39,7 @@ public class CourseService {
                 .orElseThrow(() -> new EntityNotFoundException("Course not found with ID: " + id));
     }
 
+    public List<Course> getAllCourses() {
+        return courseRepository.findAll();
+    }
 }

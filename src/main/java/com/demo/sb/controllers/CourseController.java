@@ -40,4 +40,9 @@ public class CourseController {
         List<Course> courses = courseService.getCoursesByTeacher(teacherId);
         return ResponseEntity.ok(courses);
     }
+    @GetMapping
+    public ResponseEntity<List<Course>> getAllCourses() {
+        List<Course> courses = courseService.getAllCourses();
+        return ResponseEntity.ok(courses);
+    }
 }
