@@ -4,6 +4,7 @@ import com.demo.sb.entity.CourseContent;
 import com.demo.sb.service.CourseContentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,40 +23,35 @@ public class CourseContentController {
     @Autowired
     private CourseContentService contentService;
 
-
-
-    // ─── 1) JSON‑only endpoint ───────────────────────────────────────────────────
-    // POST /api/course-content/course/{courseId}/chapter/{chapterId}
-    // Content-Type: application/json
-    // Body:
-    // {
-    //   "title":   "lolo",
-    //   "type":    "video",
-    //   "content": "https://www.youtube.com/…"
-    // }
+    /**
+     * JSON-only endpoint: accepts application/json and application/json;charset=UTF-8
+     *
+     * POST /api/course-content/course/{courseId}/chapter/{chapterId}
+     * Headers: Content-Type: application/json;charset=UTF-8 (or application/json)
+     * Body: {"title":"...","type":"video","content":"..."}
+     */
     @PostMapping(
-            value    = "/course/{courseId}/chapter/{chapterId}",
-            consumes = MediaType.APPLICATION_JSON_VALUE
+            value = "/course/{courseId}/chapter/{chapterId}",
+            consumes = { MediaType.APPLICATION_JSON_VALUE, "application/json;charset=UTF-8" }
     )
     public ResponseEntity<CourseContent> createJsonContent(
             @PathVariable int courseId,
             @PathVariable int chapterId,
-            @RequestBody  CourseContent content
+            @RequestBody CourseContent content
     ) throws IOException {
-        // file == null
         CourseContent created = contentService.createContent(content, courseId, chapterId, null);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
-    // ─── 2) PDF (or any file) upload endpoint ───────────────────────────────────
-    // POST /api/course-content/course/{courseId}/chapter/{chapterId}/upload
-    // Content-Type: multipart/form-data
-    // Form‑data keys:
-    //   title (Text)  → e.g. "Chapter 1 PDF"
-    //   type  (Text)  → must be "pdf" (or "video")
-    //   file  (File)  → your .pdf or video file
+    /**
+     * PDF (or any file) upload endpoint
+     *
+     * POST /api/course-content/course/{courseId}/chapter/{chapterId}/upload
+     * Content-Type: multipart/form-data
+     * Form-data keys: title (Text), type (Text), file (File)
+     */
     @PostMapping(
-            value    = "/course/{courseId}/chapter/{chapterId}/upload",
+            value = "/course/{courseId}/chapter/{chapterId}/upload",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public ResponseEntity<CourseContent> uploadFileContent(
@@ -65,7 +61,6 @@ public class CourseContentController {
             @RequestParam("type")  String type,
             @RequestPart("file")    MultipartFile file
     ) throws IOException {
-        // build the DTO from the form‑fields
         CourseContent content = new CourseContent();
         content.setTitle(title);
         content.setType(type);
@@ -77,7 +72,8 @@ public class CourseContentController {
     @GetMapping("/course/{courseId}/chapter/{chapterId}")
     public ResponseEntity<List<CourseContent>> getContentByCourseIdAndChapterId(
             @PathVariable int courseId,
-            @PathVariable int chapterId) {
+            @PathVariable int chapterId
+    ) {
         List<CourseContent> contents = contentService.getContentByCourseIdAndChapterId(courseId, chapterId);
         return ResponseEntity.ok(contents);
     }
@@ -86,18 +82,21 @@ public class CourseContentController {
     public ResponseEntity<FileSystemResource> downloadFile(
             @PathVariable int courseId,
             @PathVariable int chapterId,
-            @PathVariable int contentId) {
+            @PathVariable int contentId
+    ) {
         File file = contentService.getFile(courseId, chapterId, contentId);
         FileSystemResource resource = new FileSystemResource(file);
 
-        String fileName = file.getName().toLowerCase();
-        MediaType mediaType = fileName.endsWith(".pdf") ? MediaType.APPLICATION_PDF : MediaType.APPLICATION_OCTET_STREAM;
+        String filename = file.getName().toLowerCase();
+        MediaType mediaType = filename.endsWith(".pdf")
+                ? MediaType.APPLICATION_PDF
+                : MediaType.APPLICATION_OCTET_STREAM;
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + file.getName()); // <--- inline for browser display
-        headers.add(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate");
-        headers.add(HttpHeaders.PRAGMA, "no-cache");
-        headers.add(HttpHeaders.EXPIRES, "0");
+        headers.setContentDisposition(ContentDisposition.inline().filename(file.getName()).build());
+        headers.setCacheControl("no-cache, no-store, must-revalidate");
+        headers.setPragma("no-cache");
+        headers.setExpires(0);
 
         return ResponseEntity.ok()
                 .headers(headers)
@@ -106,7 +105,6 @@ public class CourseContentController {
                 .body(resource);
     }
 
-
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
@@ -114,6 +112,7 @@ public class CourseContentController {
 
     @ExceptionHandler(IOException.class)
     public ResponseEntity<String> handleIOException(IOException ex) {
-        return new ResponseEntity<>("File processing error: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>("File processing error: " + ex.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
