@@ -1,5 +1,6 @@
 package com.demo.sb.controllers;
 
+import com.demo.sb.dto.CourseContentRequest;
 import com.demo.sb.entity.CourseContent;
 import com.demo.sb.service.CourseContentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,6 @@ public class CourseContentController {
     @Autowired
     private CourseContentService contentService;
 
-
-
     // ─── 1) JSON‑only endpoint ───────────────────────────────────────────────────
     // POST /api/course-content/course/{courseId}/chapter/{chapterId}
     // Content-Type: application/json
@@ -34,15 +33,20 @@ public class CourseContentController {
     //   "content": "https://www.youtube.com/…"
     // }
     @PostMapping(
-            value    = "/course/{courseId}/chapter/{chapterId}",
-            consumes = MediaType.APPLICATION_JSON_VALUE
+            value = "/course/{courseId}/chapter/{chapterId}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<CourseContent> createJsonContent(
             @PathVariable int courseId,
             @PathVariable int chapterId,
-            @RequestBody  CourseContent content
+            @RequestBody CourseContentRequest request
     ) throws IOException {
-        // file == null
+        CourseContent content = new CourseContent();
+        content.setTitle(request.getTitle());
+        content.setContent(request.getContent());
+        content.setType(request.getType());
+
         CourseContent created = contentService.createContent(content, courseId, chapterId, null);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
@@ -51,7 +55,7 @@ public class CourseContentController {
     // POST /api/course-content/course/{courseId}/chapter/{chapterId}/upload
     // Content-Type: multipart/form-data
     // Form‑data keys:
-    //   title (Text)  → e.g. "Chapter 1 PDF"
+    //   title (Text)  → e.g. "Chapter 1 PDF"
     //   type  (Text)  → must be "pdf" (or "video")
     //   file  (File)  → your .pdf or video file
     @PostMapping(

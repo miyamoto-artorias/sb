@@ -1,7 +1,7 @@
 package com.demo.sb.entity;
 
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -10,6 +10,7 @@ import java.util.List;
 
 @Entity
 @Data
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class CourseChapter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,16 +19,12 @@ public class CourseChapter {
     private String description;
     private String type;
 
-    // Add the inverse relationship to Course
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id")
-    @JsonBackReference
-    private Course course;  // This matches mappedBy = "course" in Course entity
-
+    @JsonBackReference("course-chapters")
+    private Course course;
 
     @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    private List<CourseContent> contents;  // Changed to List and renamed to contents
-
-
+    @JsonManagedReference("chapter-contents")
+    private List<CourseContent> contents;
 }

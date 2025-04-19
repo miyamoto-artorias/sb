@@ -1,6 +1,7 @@
 package com.demo.sb.controllers;
 
 
+import com.demo.sb.dto.CourseChapterDTO;
 import com.demo.sb.entity.CourseChapter;
 import com.demo.sb.service.CourseChapterService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,16 +20,16 @@ public class CourseChapterController {
 
     // Create new chapter
 // In CourseChapterController.java
-    @PostMapping(
-            value = "/course/{courseId}",
-            consumes = {"application/json", "application/json;charset=UTF-8"}
-    )
+    @PostMapping("/course/{courseId}")
     public ResponseEntity<CourseChapter> createChapter(
             @PathVariable int courseId,
-            @ModelAttribute CourseChapter chapter) { // Changed from @RequestBody
-        CourseChapter createdChapter = chapterService.createChapter(chapter, courseId);
+            @RequestBody CourseChapterDTO chapterDTO) {
+
+        CourseChapter createdChapter = chapterService.createChapter(chapterDTO, courseId);
         return new ResponseEntity<>(createdChapter, HttpStatus.CREATED);
     }
+
+
 
     // Get chapter by ID
     @GetMapping("/{id}")

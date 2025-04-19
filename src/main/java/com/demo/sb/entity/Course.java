@@ -1,6 +1,5 @@
 package com.demo.sb.entity;
 
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -11,6 +10,7 @@ import java.util.List;
 
 @Entity
 @Data
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,7 +45,7 @@ private List<Category> categories; // Changed from 'category' to 'categories'
 
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
-    @JsonManagedReference // Add this to the "parent" side
+    @JsonManagedReference("course-quizzes")
     private List<QCM> quizzes;
     /*
     @OneToMany(mappedBy = "course")
@@ -54,7 +54,7 @@ private List<Category> categories; // Changed from 'category' to 'categories'
 
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonManagedReference("course-chapters")
     private List<CourseChapter> chapters;
 
 

@@ -1,11 +1,13 @@
 package com.demo.sb.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
 @Data
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class CourseContent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,10 +16,8 @@ public class CourseContent {
     private String content;
     private String type;
 
-    // Added the missing inverse relationship
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chapter_id")
-    @JsonBackReference
+    @JsonBackReference("chapter-contents")
     private CourseChapter chapter;
-
 }

@@ -1,6 +1,7 @@
 package com.demo.sb.service;
 
 
+import com.demo.sb.dto.CourseChapterDTO;
 import com.demo.sb.entity.Course;
 import com.demo.sb.entity.CourseChapter;
 import com.demo.sb.repository.CourseChapterRepository;
@@ -22,14 +23,21 @@ public class CourseChapterService {
     private CourseRepository courseRepository; // For linking to Course
 
     // Create new chapter
+
     @Transactional
-    public CourseChapter createChapter(CourseChapter chapter, int courseId) {
+    public CourseChapter createChapter(CourseChapterDTO chapterDTO, int courseId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
 
-        chapter.setCourse(course); // Explicitly link the chapter to the course
+        CourseChapter chapter = new CourseChapter();
+        chapter.setTitle(chapterDTO.getTitle());
+        chapter.setDescription(chapterDTO.getDescription());
+        chapter.setType(chapterDTO.getType());
+        chapter.setCourse(course);
+
         return chapterRepository.save(chapter);
     }
+
 
     // Get chapter by ID
     public CourseChapter getChapterById(int id) {
