@@ -22,26 +22,56 @@ public class CourseContentController {
     @Autowired
     private CourseContentService contentService;
 
-    @PostMapping(value = "/course/{courseId}/chapter/{chapterId}",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<CourseContent> createContent(
+
+
+    // ─── 1) JSON‑only endpoint ───────────────────────────────────────────────────
+    // POST /api/course-content/course/{courseId}/chapter/{chapterId}
+    // Content-Type: application/json
+    // Body:
+    // {
+    //   "title":   "lolo",
+    //   "type":    "video",
+    //   "content": "https://www.youtube.com/…"
+    // }
+    @PostMapping(
+            value    = "/course/{courseId}/chapter/{chapterId}",
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<CourseContent> createJsonContent(
             @PathVariable int courseId,
             @PathVariable int chapterId,
-            @RequestPart(name = "content", required = false) CourseContent content,
-            @RequestPart(name = "file", required = false) MultipartFile file) throws IOException {
-        // Validate content presence when no file is provided
-        if (content == null && file == null) {
-            throw new IllegalArgumentException("At least one of 'content' or 'file' must be provided");
-        }
+            @RequestBody  CourseContent content
+    ) throws IOException {
+        // file == null
+        CourseContent created = contentService.createContent(content, courseId, chapterId, null);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
+    }
 
-        // If content is null but file is provided, create a default CourseContent
-        if (content == null) {
-            content = new CourseContent();
-            content.setType("pdf"); // Default type if file is provided
-        }
+    // ─── 2) PDF (or any file) upload endpoint ───────────────────────────────────
+    // POST /api/course-content/course/{courseId}/chapter/{chapterId}/upload
+    // Content-Type: multipart/form-data
+    // Form‑data keys:
+    //   title (Text)  → e.g. "Chapter 1 PDF"
+    //   type  (Text)  → must be "pdf" (or "video")
+    //   file  (File)  → your .pdf or video file
+    @PostMapping(
+            value    = "/course/{courseId}/chapter/{chapterId}/upload",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<CourseContent> uploadFileContent(
+            @PathVariable int courseId,
+            @PathVariable int chapterId,
+            @RequestParam("title") String title,
+            @RequestParam("type")  String type,
+            @RequestPart("file")    MultipartFile file
+    ) throws IOException {
+        // build the DTO from the form‑fields
+        CourseContent content = new CourseContent();
+        content.setTitle(title);
+        content.setType(type);
 
-        CourseContent createdContent = contentService.createContent(content, courseId, chapterId, file);
-        return new ResponseEntity<>(createdContent, HttpStatus.CREATED);
+        CourseContent created = contentService.createContent(content, courseId, chapterId, file);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @GetMapping("/course/{courseId}/chapter/{chapterId}")
