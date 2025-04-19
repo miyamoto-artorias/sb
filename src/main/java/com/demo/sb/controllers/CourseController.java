@@ -1,6 +1,7 @@
 package com.demo.sb.controllers;
 
 
+import com.demo.sb.dto.CourseDTO;
 import com.demo.sb.entity.Course;
 import com.demo.sb.service.CourseService;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,6 +19,23 @@ public class CourseController {
     @Autowired
     private CourseService courseService;
 
+
+    @PostMapping("/{teacherId}")
+    public ResponseEntity<Course> createCourse(@RequestBody CourseDTO courseDto, @PathVariable int teacherId) {
+        // Convert DTO to entity
+        Course course = new Course();
+        course.setTitle(courseDto.getTitle());
+        course.setDescription(courseDto.getDescription());
+        course.setPicture(courseDto.getPicture());
+        course.setPrice(courseDto.getPrice());
+
+        Course createdCourse = courseService.createCourse(course, teacherId);
+        return ResponseEntity.ok(createdCourse);
+    }
+
+
+
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getCourseById(@PathVariable int id) {
         try {
@@ -30,10 +48,7 @@ public class CourseController {
     }
 
 
-    @PostMapping("/{teacherId}")
-    public ResponseEntity<Course> createCourse(@RequestBody Course course, @PathVariable int teacherId) {
-        return ResponseEntity.ok(courseService.createCourse(course, teacherId));
-    }
+
 
     @GetMapping("/teacher/{teacherId}")
     public ResponseEntity<List<Course>> getCoursesByTeacher(@PathVariable int teacherId) {
