@@ -40,10 +40,11 @@ public class PaymentService {
 
         Card payerCard = cardService.getCard(paymentRequest.getCardId());
 
-        // Check for existing purchase
-        if (paymentRepository.existsByPayerIdAndCourseId(payer.getId(), course.getId())) {
+        // Check for existing COMPLETED payment
+        if (paymentRepository.existsByPayerIdAndCourseIdAndStatus(payer.getId(), course.getId(), "completed")) {
             throw new IllegalArgumentException("This course has already been purchased by the user");
         }
+
 
         // Prepare payment entity
         Payment payment = new Payment();

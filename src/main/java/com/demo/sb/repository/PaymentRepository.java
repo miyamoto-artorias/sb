@@ -9,7 +9,7 @@ import java.util.List;
 public interface PaymentRepository extends JpaRepository<Payment, Integer> {
     List<Payment> findByPayerId(int payerId);
     List<Payment> findByReceiverId(int receiverId);
-    boolean existsByPayerIdAndCourseId(int payerId, int courseId);
+    boolean existsByPayerIdAndCourseIdAndStatus(int payerId, int courseId, String status);
 
 
 }
