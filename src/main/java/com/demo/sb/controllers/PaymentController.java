@@ -16,8 +16,8 @@ public class PaymentController {
     @Autowired
     private PaymentService paymentService;
 
-    @PostMapping("")
-    public ResponseEntity<?> createPayment(@Valid @RequestBody Payment payment) {
+    @PostMapping(consumes = "application/json", produces = "application/json")
+    public ResponseEntity<?> createPayment(@RequestBody Payment payment) {
         try {
             Payment savedPayment = paymentService.createPayment(payment);
             if ("failed".equals(savedPayment.getStatus())) {

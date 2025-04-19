@@ -21,33 +21,34 @@ public class PaymentService {
 
     @Transactional
     public Payment createPayment(Payment payment) {
-        // Validate payment
-        if (payment.getCard() == null || payment.getReceiver() == null) {
-            throw new IllegalArgumentException("Payment must have a card and receiver");
+        // Validate input
+        if (payment.getCard() == null || payment.getReceiver() == null || payment.getCourse() == null || payment.getPayer() == null) {
+            throw new IllegalArgumentException("Payment must have card, receiver, payer, and course");
         }
 
-        // Get payer's card
+        int payerId = payment.getPayer().getId();
+        int courseId = payment.getCourse().getId();
+
+        // Check if the payment already exists
+        if (paymentRepository.existsByPayerIdAndCourseId(payerId, courseId)) {
+            throw new IllegalArgumentException("This course has already been purchased by the user.");
+        }
+
         Card payerCard = cardService.getCard(payment.getCard().getId());
+        Card receiverCard = cardService.getCardByUserId(payment.getReceiver().getId());
 
-        // Get receiver's card from user
-        User receiver = payment.getReceiver();
-        Card receiverCard = cardService.getCardByUserId(receiver.getId()); // Fetch card by user ID
-
-        // Check payer balance
         if (payerCard.getBalance() < payment.getAmount()) {
             payment.setStatus("failed");
             payment.setDate(LocalDateTime.now());
             return paymentRepository.save(payment);
         }
 
-        // Perform balance transfers
         cardService.updateCardBalance(payerCard.getId(), -payment.getAmount());
         cardService.updateCardBalance(receiverCard.getId(), payment.getAmount());
 
-        // Update payment status
         payment.setStatus("completed");
         payment.setDate(LocalDateTime.now());
-        payment.setCard(payerCard); // Ensure full card object is persisted
+        payment.setCard(payerCard);
 
         return paymentRepository.save(payment);
     }

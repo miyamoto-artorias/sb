@@ -18,6 +18,8 @@ public class Payment {
 
     private String status; // e.g., "pending", "completed"
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
     @ManyToOne(fetch = FetchType.LAZY)
