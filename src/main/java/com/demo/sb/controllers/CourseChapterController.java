@@ -18,10 +18,14 @@ public class CourseChapterController {
     private CourseChapterService chapterService;
 
     // Create new chapter
-    @PostMapping("/course/{courseId}")
+// In CourseChapterController.java
+    @PostMapping(
+            value = "/course/{courseId}",
+            consumes = {"application/json", "application/json;charset=UTF-8"}
+    )
     public ResponseEntity<CourseChapter> createChapter(
             @PathVariable int courseId,
-            @RequestBody CourseChapter chapter) {
+            @ModelAttribute CourseChapter chapter) { // Changed from @RequestBody
         CourseChapter createdChapter = chapterService.createChapter(chapter, courseId);
         return new ResponseEntity<>(createdChapter, HttpStatus.CREATED);
     }

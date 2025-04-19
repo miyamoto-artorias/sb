@@ -24,12 +24,10 @@ public class CourseChapterService {
     // Create new chapter
     @Transactional
     public CourseChapter createChapter(CourseChapter chapter, int courseId) {
-        Optional<Course> course = courseRepository.findById(courseId);
-        if (course.isEmpty()) {
-            throw new IllegalArgumentException("Course with ID " + courseId + " not found");
-        }
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
 
-        chapter.setCourse(course.get());
+        chapter.setCourse(course); // Explicitly link the chapter to the course
         return chapterRepository.save(chapter);
     }
 
