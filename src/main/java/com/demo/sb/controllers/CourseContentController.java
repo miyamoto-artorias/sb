@@ -23,11 +23,11 @@ public class CourseContentController {
     private CourseContentService contentService;
 
     @PostMapping(value = "/course/{courseId}/chapter/{chapterId}",
-            consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CourseContent> createContent(
             @PathVariable int courseId,
             @PathVariable int chapterId,
-            @RequestPart(name = "content", required = false) CourseContent content, // Explicitly name the part
+            @RequestPart(name = "content", required = false) CourseContent content,
             @RequestPart(name = "file", required = false) MultipartFile file) throws IOException {
         // Validate content presence when no file is provided
         if (content == null && file == null) {
@@ -37,6 +37,7 @@ public class CourseContentController {
         // If content is null but file is provided, create a default CourseContent
         if (content == null) {
             content = new CourseContent();
+            content.setType("pdf"); // Default type if file is provided
         }
 
         CourseContent createdContent = contentService.createContent(content, courseId, chapterId, file);
