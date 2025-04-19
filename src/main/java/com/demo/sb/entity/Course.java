@@ -2,6 +2,7 @@ package com.demo.sb.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -26,7 +27,7 @@ public class Course {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teacher_id", nullable = false)
-    @JsonBackReference // Add this to the "child" side
+    @JsonIgnoreProperties({"uploadedCourses", "hibernateLazyInitializer", "handler"})
     private Teacher teacher;
 
 
@@ -55,5 +56,6 @@ private List<Category> categories; // Changed from 'category' to 'categories'
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<CourseChapter> chapters;
+
 
 }
