@@ -1,5 +1,6 @@
 package com.demo.sb.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -20,17 +21,21 @@ public class Payment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Course course;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payer_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User payer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User receiver; // Changed from Teacher to User
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "card_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Card card; // The card used for this payment
 }

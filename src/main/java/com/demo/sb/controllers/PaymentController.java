@@ -1,6 +1,7 @@
 package com.demo.sb.controllers;
 
 import com.demo.sb.entity.Payment;
+import com.demo.sb.entity.PaymentRequest;
 import com.demo.sb.service.PaymentService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -16,7 +17,24 @@ public class PaymentController {
     @Autowired
     private PaymentService paymentService;
 
-    @PostMapping(consumes = "application/json", produces = "application/json")
+
+    // In PaymentController.java
+    @PostMapping
+    public ResponseEntity<?> createPayment(@RequestBody PaymentRequest paymentRequest) {
+        try {
+            Payment savedPayment = paymentService.createPayment(paymentRequest);
+            return ResponseEntity.ok(savedPayment);
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
+    /*
+    @PostMapping(
+            consumes = {"application/json", "application/json;charset=UTF-8"},
+            produces = "application/json")
     public ResponseEntity<?> createPayment(@RequestBody Payment payment) {
         try {
             Payment savedPayment = paymentService.createPayment(payment);
@@ -30,6 +48,8 @@ public class PaymentController {
             return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
+    */
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Payment> getPaymentById(@PathVariable int id) {

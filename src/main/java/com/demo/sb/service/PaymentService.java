@@ -1,9 +1,10 @@
 package com.demo.sb.service;
 
-import com.demo.sb.entity.Card;
-import com.demo.sb.entity.Payment;
-import com.demo.sb.entity.User;
+import com.demo.sb.entity.*;
+import com.demo.sb.repository.CourseRepository;
 import com.demo.sb.repository.PaymentRepository;
+import com.demo.sb.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +19,59 @@ public class PaymentService {
 
     @Autowired
     private CardService cardService;
+    @Autowired
+    private UserRepository userRepository;
 
+    @Autowired
+    private CourseRepository courseRepository;
+
+
+    @Transactional
+    public Payment createPayment(PaymentRequest paymentRequest) {
+        // Fetch required entities
+        User payer = userRepository.findById(paymentRequest.getPayerId())
+                .orElseThrow(() -> new EntityNotFoundException("Payer not found with ID: " + paymentRequest.getPayerId()));
+
+        User receiver = userRepository.findById(paymentRequest.getReceiverId())
+                .orElseThrow(() -> new EntityNotFoundException("Receiver not found with ID: " + paymentRequest.getReceiverId()));
+
+        Course course = courseRepository.findById(paymentRequest.getCourseId())
+                .orElseThrow(() -> new EntityNotFoundException("Course not found with ID: " + paymentRequest.getCourseId()));
+
+        Card payerCard = cardService.getCard(paymentRequest.getCardId());
+
+        // Check for existing purchase
+        if (paymentRepository.existsByPayerIdAndCourseId(payer.getId(), course.getId())) {
+            throw new IllegalArgumentException("This course has already been purchased by the user");
+        }
+
+        // Prepare payment entity
+        Payment payment = new Payment();
+        payment.setAmount(paymentRequest.getAmount());
+        payment.setPayer(payer);
+        payment.setReceiver(receiver);
+        payment.setCourse(course);
+        payment.setCard(payerCard);
+        payment.setDate(LocalDateTime.now());
+
+        // Check payer's balance
+        if (payerCard.getBalance() < paymentRequest.getAmount()) {
+            payment.setStatus("failed");
+            return paymentRepository.save(payment);
+        }
+
+        // Process payment
+        Card receiverCard = cardService.getCardByUserId(receiver.getId());
+        cardService.updateCardBalance(payerCard.getId(), -paymentRequest.getAmount());
+        cardService.updateCardBalance(receiverCard.getId(), paymentRequest.getAmount());
+
+        payment.setStatus("completed");
+        return paymentRepository.save(payment);
+    }
+
+
+
+    /*
     @Transactional
     public Payment createPayment(Payment payment) {
         // Validate input
@@ -52,7 +105,7 @@ public class PaymentService {
 
         return paymentRepository.save(payment);
     }
-
+        */
     public Optional<Payment> findById(int id) {
         return paymentRepository.findById(id);
     }
