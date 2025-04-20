@@ -1,12 +1,15 @@
 package com.demo.sb.dto;
 
+import java.util.List;
+
 public class CourseDTO {
     private String title;
     private String description;
     private String picture;
     private float price;
+    private List<Integer> categoryIds; // IDs of categories
 
-    // Getters and Setters (without Lombok)
+    // Getters and Setters
     public String getTitle() {
         return title;
     }
@@ -37,5 +40,13 @@ public class CourseDTO {
 
     public void setPrice(float price) {
         this.price = price;
+    }
+
+    public List<Integer> getCategoryIds() {
+        return categoryIds;
+    }
+
+    public void setCategoryIds(List<Integer> categoryIds) {
+        this.categoryIds = categoryIds;
     }
 }

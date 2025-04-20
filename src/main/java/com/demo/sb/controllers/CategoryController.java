@@ -1,6 +1,7 @@
 package com.demo.sb.controllers;
 
 
+import com.demo.sb.dto.CategoryDTO;
 import com.demo.sb.entity.Category;
 import com.demo.sb.entity.Course;
 import com.demo.sb.service.CategoryService;
@@ -19,10 +20,14 @@ public class CategoryController {
     private CategoryService categoryService;
 
     @PostMapping
-    public ResponseEntity<Category> createCategory(@Valid @RequestBody Category category) {
-        Category savedCategory = categoryService.createCategory(category); // Assume this method exists
+    public ResponseEntity<Category> createCategory(@Valid @RequestBody CategoryDTO categoryDto) {
+        Category category = new Category();
+        category.setTitle(categoryDto.getTitle());
+        category.setDescription(categoryDto.getDescription());
+        Category savedCategory = categoryService.createCategory(category);
         return ResponseEntity.ok(savedCategory);
     }
+
 
     @GetMapping("/{id}/courses")
     public ResponseEntity<List<Course>> getCoursesByCategory(@PathVariable int id) {
