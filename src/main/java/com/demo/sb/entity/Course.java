@@ -31,10 +31,7 @@ public class Course {
     private Teacher teacher;
 
 
-/*
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category; */
+
     @ManyToMany
     @JoinTable(
         name = "course_category",
@@ -47,10 +44,7 @@ private List<Category> categories; // Changed from 'category' to 'categories'
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     @JsonManagedReference("course-quizzes")
     private List<QCM> quizzes;
-    /*
-    @OneToMany(mappedBy = "course")
-    @JsonManagedReference // Add this to the "parent" side
-    private List<Enrollment> enrollments; */
+
 
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)

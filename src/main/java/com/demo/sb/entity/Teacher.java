@@ -25,13 +25,5 @@ public class Teacher extends User {
     private float totalEarnings; // New field for total money made
 
 
-    /*
-    @ManyToMany
-    @JoinTable(
-            name = "teacher_course_enrollment",
-            joinColumns = @JoinColumn(name = "teacher_id"),
-            inverseJoinColumns = @JoinColumn(name = "course_id")
-    )
-    private List<Course> enrolledCourses; // Teachers can enroll like Students
-    */
+
 }

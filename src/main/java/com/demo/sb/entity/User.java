@@ -33,16 +33,7 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    // Common course enrollment for both Teachers and Students
-    /*
-    @ManyToMany
-    @JoinTable(
-            name = "user_course_enrollment",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "course_id")
-    )
-    @JsonIgnore  // Prevents serialization of this property
-    private List<Course> enrolledCourses; */
+
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, optional = true)
     @JsonIgnoreProperties({"user", "hibernateLazyInitializer", "handler"})
