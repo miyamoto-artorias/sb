@@ -4,30 +4,37 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
-
-@Entity
 @Data
+@Entity
 public class QuizQuestion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long questionId;
-    @Column(name = "question_order")
-    private int questionOrder; // Renamed from 'order' to 'questionOrder' to avoid SQL reserved keyword conflict
-    private String text;
-    private String type; // MULTIPLE_CHOICE, TRUE_FALSE, etc.
-    private String hint;
+
+    private String questionText;
+    
+    @Enumerated(EnumType.STRING)
+    private QuizQuestionType questionType;
 
     @ElementCollection
-    private List<String> options;
+    private List<String> options; // For multiple choice questions
+
+    private String correctAnswer;
 
     @ElementCollection
-    private List<String> correctAnswers;
-
-    private double points;
-    private String explanation;
+    private List<String> correctAnswers; // For multiple correct answers
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id")
     private Quiz quiz;
+
+    private double points;
+    
+    @ElementCollection
+    private Map<String, String> matchingPairs; // For matching type questions
+    
+    @ElementCollection
+    private List<String> orderingSequence; // For ordering type questions
 }
