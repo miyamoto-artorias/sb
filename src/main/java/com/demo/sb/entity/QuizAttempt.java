@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @Data
 @NoArgsConstructor
@@ -26,8 +28,11 @@ public class QuizAttempt {
     @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 
-    @OneToMany(mappedBy = "attempt", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<QuizAttemptResponse> responses = new ArrayList<>();
+    @ElementCollection
+    @CollectionTable(name = "quiz_attempt_responses", joinColumns = @JoinColumn(name = "attempt_id"))
+    @MapKeyColumn(name = "question_id")
+    @Column(name = "response")
+    private Map<Long, String> responses = new HashMap<>();
 
     @Column(name = "score")
     private double score;
@@ -37,9 +42,4 @@ public class QuizAttempt {
     
     @Column(name = "status")
     private String status; // PASSED, FAILED
-
-    public void addResponse(Long questionId, String response) {
-        QuizAttemptResponse attemptResponse = new QuizAttemptResponse(this, questionId, response);
-        this.responses.add(attemptResponse);
-    }
 }

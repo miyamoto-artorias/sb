@@ -1,11 +1,9 @@
 package com.demo.sb.dto;
 
 import com.demo.sb.entity.QuizAttempt;
-import com.demo.sb.entity.QuizAttemptResponse;
-import lombok.Data;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
+import lombok.Data;
 
 @Data
 public class QuizAttemptDto {
@@ -24,14 +22,9 @@ public class QuizAttemptDto {
         dto.setScore(attempt.getScore());
         dto.setStatus(attempt.getStatus());
         
-        // Convert responses to Map
+        // Copy the responses map
         if (attempt.getResponses() != null) {
-            Map<Long, String> responseMap = attempt.getResponses().stream()
-                .collect(Collectors.toMap(
-                    QuizAttemptResponse::getQuestionId,
-                    QuizAttemptResponse::getResponse
-                ));
-            dto.setResponses(responseMap);
+            dto.setResponses(new HashMap<>(attempt.getResponses()));
         }
         
         return dto;
