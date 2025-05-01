@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.List;
+import java.util.ArrayList;
+import com.demo.sb.entity.Quiz;
 
 @Entity
 @Data
@@ -27,4 +29,8 @@ public class CourseChapter {
     @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL)
     @JsonManagedReference("chapter-contents")
     private List<CourseContent> contents;
+
+    @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL)
+    @JsonManagedReference("chapter-quizzes")
+    private List<Quiz> quizzes = new ArrayList<>();
 }
