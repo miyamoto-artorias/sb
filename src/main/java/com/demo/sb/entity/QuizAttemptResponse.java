@@ -15,10 +15,10 @@ public class QuizAttemptResponse {
     private Long responseId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "attempt_id", nullable = false, referencedColumnName = "attempt_id")
+    @JoinColumn(name = "quiz_attempt_attempt_id", nullable = false, referencedColumnName = "attempt_id")
     private QuizAttempt attempt;
 
-    @Column(name = "question_id", nullable = false)
+    @Column(name = "responses_key", nullable = false)
     private Long questionId;
 
     @Column(name = "response", nullable = false)
