@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -109,5 +110,10 @@ public class PaymentService {
         */
     public Optional<Payment> findById(int id) {
         return paymentRepository.findById(id);
+    }
+
+    // Add method to fetch payments by payer (user) ID
+    public List<Payment> getPaymentsByUser(int userId) {
+        return paymentRepository.findByPayerId(userId);
     }
 }

@@ -9,7 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import com.demo.sb.dto.PaymentByUserRequest;
+import com.demo.sb.dto.PaymentResponseDto;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -55,5 +60,14 @@ public class PaymentController {
     public ResponseEntity<Payment> getPaymentById(@PathVariable int id) {
         Optional<Payment> payment = paymentService.findById(id);
         return payment.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/byUser")
+    public ResponseEntity<List<PaymentResponseDto>> getPaymentsByUser(@RequestBody @Valid PaymentByUserRequest request) {
+        List<Payment> payments = paymentService.getPaymentsByUser(request.getUserId());
+        List<PaymentResponseDto> responseDtos = payments.stream()
+                .map(PaymentResponseDto::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responseDtos);
     }
 }
