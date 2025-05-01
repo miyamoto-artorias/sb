@@ -22,7 +22,11 @@ public class QuizAttempt {
     private Quiz quiz;
 
     @ElementCollection
-    private Map<QuizQuestion, String> responses;
+    @CollectionTable(name = "quiz_attempt_responses", 
+                    joinColumns = @JoinColumn(name = "attempt_id"))
+    @MapKeyColumn(name = "question_id")
+    @Column(name = "response")
+    private Map<Long, String> responses;
 
     private double score;
     private Date completedAt;

@@ -1,7 +1,9 @@
 package com.demo.sb.controllers;
 
 import com.demo.sb.dto.QuizDto;
+import com.demo.sb.dto.QuizAttemptDto;
 import com.demo.sb.service.QuizService;
+import com.demo.sb.service.QuizAttemptService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,9 @@ public class QuizController {
 
     @Autowired
     private QuizService quizService;
+
+    @Autowired
+    private QuizAttemptService attemptService;
 
     /**
      * POST /api/chapters/{chapterId}/quizzes
@@ -36,5 +41,31 @@ public class QuizController {
             @PathVariable int chapterId) {
         List<QuizDto> quizzes = quizService.getQuizzesByChapter(chapterId);
         return ResponseEntity.ok(quizzes);
+    }
+
+    /**
+     * POST /api/chapters/{chapterId}/quizzes/{quizId}/attempt
+     * Submit an attempt for a specific quiz in a chapter
+     */
+    @PostMapping("/{quizId}/attempt")
+    public ResponseEntity<QuizAttemptDto> submitQuizAttempt(
+            @PathVariable int chapterId,
+            @PathVariable Long quizId,
+            @RequestParam int userId,
+            @RequestBody QuizAttemptDto attemptDto) {
+        QuizAttemptDto result = attemptService.submitQuizAttempt(quizId, userId, attemptDto);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * GET /api/chapters/{chapterId}/quizzes/{quizId}/attempts
+     * Get all attempts for a specific quiz
+     */
+    @GetMapping("/{quizId}/attempts")
+    public ResponseEntity<List<QuizAttemptDto>> getQuizAttempts(
+            @PathVariable int chapterId,
+            @PathVariable Long quizId) {
+        List<QuizAttemptDto> attempts = attemptService.getQuizAttempts(quizId);
+        return ResponseEntity.ok(attempts);
     }
 } 
