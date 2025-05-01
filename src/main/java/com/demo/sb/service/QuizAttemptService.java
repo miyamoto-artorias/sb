@@ -1,10 +1,7 @@
 package com.demo.sb.service;
 
 import com.demo.sb.dto.QuizAttemptDto;
-import com.demo.sb.entity.Quiz;
-import com.demo.sb.entity.QuizAttempt;
-import com.demo.sb.entity.QuizQuestion;
-import com.demo.sb.entity.User;
+import com.demo.sb.entity.*;
 import com.demo.sb.repository.QuizAttemptRepository;
 import com.demo.sb.repository.QuizRepository;
 import com.demo.sb.repository.UserRepository;
@@ -17,6 +14,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.HashMap;
 
 @Service
 public class QuizAttemptService {
@@ -44,17 +42,32 @@ public class QuizAttemptService {
             throw new IllegalStateException("Maximum attempts reached for this quiz");
         }
 
+        // Create the attempt
         QuizAttempt attempt = new QuizAttempt();
         attempt.setQuiz(quiz);
         attempt.setUser(user);
-        attempt.setResponses(attemptDto.getResponses());
         attempt.setCompletedAt(new Date());
+        attempt.setScore(0);
+        attempt.setStatus("PENDING");
+        
+        // Save the attempt first to get an ID
+        QuizAttempt savedAttempt = attemptRepository.save(attempt);
+        
+        // Add responses
+        if (attemptDto.getResponses() != null && !attemptDto.getResponses().isEmpty()) {
+            final QuizAttempt finalAttempt = savedAttempt;
+            attemptDto.getResponses().forEach((questionId, response) -> 
+                finalAttempt.addResponse(questionId, response)
+            );
+        }
         
         // Calculate score
-        calculateScore(attempt, quiz);
+        calculateScore(savedAttempt, quiz);
         
-        QuizAttempt savedAttempt = attemptRepository.save(attempt);
-        return mapToDto(savedAttempt);
+        // Save again with responses and score
+        savedAttempt = attemptRepository.save(savedAttempt);
+        
+        return QuizAttemptDto.fromEntity(savedAttempt);
     }
 
     private void calculateScore(QuizAttempt attempt, Quiz quiz) {
@@ -67,9 +80,9 @@ public class QuizAttemptService {
         double totalPoints = 0;
         double earnedPoints = 0;
         
-        for (Map.Entry<Long, String> entry : attempt.getResponses().entrySet()) {
-            Long questionId = entry.getKey();
-            String response = entry.getValue();
+        for (QuizAttemptResponse response : attempt.getResponses()) {
+            Long questionId = response.getQuestionId();
+            String answer = response.getResponse();
             
             // Find the question in the quiz
             QuizQuestion question = quiz.getQuestions().stream()
@@ -82,21 +95,21 @@ public class QuizAttemptService {
             switch (question.getQuestionType()) {
                 case MULTIPLE_CHOICE_SINGLE:
                 case TRUE_FALSE:
-                    if (response.equals(question.getCorrectAnswer())) {
+                    if (answer.equals(question.getCorrectAnswer())) {
                         earnedPoints += question.getPoints();
                     }
                     break;
                 case MULTIPLE_CHOICE_MULTIPLE:
                     // Split the response string into individual answers
-                    String[] answers = response.split(",");
-                    for (String answer : answers) {
-                        if (question.getCorrectAnswers().contains(answer.trim())) {
+                    String[] answers = answer.split(",");
+                    for (String ans : answers) {
+                        if (question.getCorrectAnswers().contains(ans.trim())) {
                             earnedPoints += question.getPoints() / question.getCorrectAnswers().size();
                         }
                     }
                     break;
                 case SHORT_TEXT:
-                    if (response.equalsIgnoreCase(question.getCorrectAnswer())) {
+                    if (answer.equalsIgnoreCase(question.getCorrectAnswer())) {
                         earnedPoints += question.getPoints();
                     }
                     break;
@@ -109,21 +122,10 @@ public class QuizAttemptService {
         attempt.setStatus(finalScore >= attempt.getQuiz().getPassingScore() ? "PASSED" : "FAILED");
     }
 
-    private QuizAttemptDto mapToDto(QuizAttempt attempt) {
-        QuizAttemptDto dto = new QuizAttemptDto();
-        dto.setAttemptId(attempt.getAttemptId());
-        dto.setQuizId(attempt.getQuiz().getQuizId());
-        dto.setUserId(attempt.getUser().getId());
-        dto.setScore(attempt.getScore());
-        dto.setStatus(attempt.getStatus());
-        dto.setResponses(attempt.getResponses());
-        return dto;
-    }
-
     public List<QuizAttemptDto> getQuizAttempts(Long quizId) {
         List<QuizAttempt> attempts = attemptRepository.findByQuizId(quizId);
         return attempts.stream()
-            .map(this::mapToDto)
+            .map(QuizAttemptDto::fromEntity)
             .collect(Collectors.toList());
     }
 } 
