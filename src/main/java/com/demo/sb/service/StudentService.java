@@ -12,6 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+import com.demo.sb.dto.StudentDto;
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
 public class StudentService {
     @Autowired
@@ -21,8 +24,20 @@ public class StudentService {
     private CourseRepository courseRepository;
 
     @Transactional
-    public Student createStudent(Student student) {
-        return studentRepository.save(student);
+    public StudentDto createStudent(StudentDto studentDto) {
+        Student student = studentDto.toEntity();  // Convert DTO to entity
+        Student savedStudent = studentRepository.save(student);
+        return StudentDto.fromEntity(savedStudent);  // Convert back to DTO
+    }
+
+    @Transactional
+    public StudentDto updateStudent(StudentDto studentDto) {
+        if (!studentRepository.existsById(studentDto.getId())) {
+            throw new EntityNotFoundException("Student not found");
+        }
+        Student student = studentDto.toEntity();  // Convert DTO to entity
+        Student updatedStudent = studentRepository.save(student);
+        return StudentDto.fromEntity(updatedStudent);  // Convert back to DTO
     }
 
     public Optional<Student> findById(int id) {

@@ -2,6 +2,7 @@ package com.demo.sb.controllers;
 
 import com.demo.sb.entity.Course;
 import com.demo.sb.entity.Student;
+import com.demo.sb.dto.StudentDto;
 import com.demo.sb.service.StudentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +19,16 @@ public class StudentController {
     private StudentService studentService;
 
     @PostMapping
-    public ResponseEntity<Student> createStudent(@Valid @RequestBody Student student) {
-        Student savedStudent = studentService.createStudent(student); // Assume this method exists
-        return ResponseEntity.ok(savedStudent);
+    public ResponseEntity<StudentDto> createStudent(@Valid @RequestBody StudentDto studentDto) {
+        StudentDto createdStudentDto = studentService.createStudent(studentDto);
+        return ResponseEntity.ok(createdStudentDto);
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<StudentDto> updateStudent(@PathVariable int id, @Valid @RequestBody StudentDto studentDto) {
+        studentDto.setId(id);  // Ensure ID is set
+        StudentDto updatedStudentDto = studentService.updateStudent(studentDto);
+        return ResponseEntity.ok(updatedStudentDto);
     }
 
     @GetMapping("/{id}")

@@ -1,6 +1,7 @@
 package com.demo.sb.service;
 
 
+import com.demo.sb.dto.UserDto;
 import com.demo.sb.entity.User;
 import com.demo.sb.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -27,10 +28,10 @@ public class UserService {
     }
 
     @Transactional
-    public User createUser(User user) {
-        // Save plain text password directly
-        // user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+    public UserDto createUser(UserDto userDto) {
+        User user = userDto.toEntity();  // Convert DTO to entity
+        User savedUser = userRepository.save(user);
+        return UserDto.fromEntity(savedUser);  // Convert back to DTO
     }
 
     /*@Transactional
@@ -52,10 +53,12 @@ public class UserService {
     }
 
     @Transactional
-    public User updateUser(User user) {
-        if (!userRepository.existsById(user.getId())) {
-            throw new RuntimeException("User not found");
+    public UserDto updateUser(UserDto userDto) {
+        if (!userRepository.existsById(userDto.getId())) {
+            throw new EntityNotFoundException("User not found");
         }
-        return userRepository.save(user);
+        User user = userDto.toEntity();  // Convert DTO to entity
+        User updatedUser = userRepository.save(user);
+        return UserDto.fromEntity(updatedUser);  // Convert back to DTO
     }
 }

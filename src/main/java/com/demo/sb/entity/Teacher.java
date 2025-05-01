@@ -18,6 +18,10 @@ public class Teacher extends User {
     @CollectionTable(name = "teacher_expertise", joinColumns = @JoinColumn(name = "teacher_id"))
     private List<String> expertise;
 
+    @ElementCollection
+    @CollectionTable(name = "teacher_qualifications", joinColumns = @JoinColumn(name = "teacher_id"))
+    private List<String> qualification;  // List of qualifications
+
     @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL)
     @JsonManagedReference // Add this to the "parent" side
     private List<Course> uploadedCourses;

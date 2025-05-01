@@ -4,6 +4,7 @@ package com.demo.sb.controllers;
 
 import com.demo.sb.entity.Course;
 import com.demo.sb.entity.Teacher;
+import com.demo.sb.dto.TeacherDto;
 import com.demo.sb.service.TeacherService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +21,16 @@ public class TeacherController {
     private TeacherService teacherService;
 
     @PostMapping
-    public ResponseEntity<Teacher> createTeacher(@Valid @RequestBody Teacher teacher) {
-        Teacher savedTeacher = teacherService.createTeacher(teacher); // Assume this method exists
-        return ResponseEntity.ok(savedTeacher);
+    public ResponseEntity<TeacherDto> createTeacher(@Valid @RequestBody TeacherDto teacherDto) {
+        TeacherDto createdTeacherDto = teacherService.createTeacher(teacherDto);
+        return ResponseEntity.ok(createdTeacherDto);
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<TeacherDto> updateTeacher(@PathVariable int id, @Valid @RequestBody TeacherDto teacherDto) {
+        teacherDto.setId(id);  // Ensure ID is set
+        TeacherDto updatedTeacherDto = teacherService.updateTeacher(teacherDto);
+        return ResponseEntity.ok(updatedTeacherDto);
     }
 
     @GetMapping("/{id}")
