@@ -1,38 +1,25 @@
-package com.demo.sb.entity;
-
-
-import jakarta.persistence.*;
-import lombok.Data;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-@Data
 @Entity
+@Data
 public class Quiz {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long quizId;
-    private String title;
-    private String description;
 
+    // ... other fields ...
+
+    // Cascade questions → JSON will serialize questions but not back into quiz
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
     @JsonManagedReference("quiz-questions")
     private List<QuizQuestion> questions = new ArrayList<>();
 
+    // Link back to chapter without serializing the chapter's quizzes again
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chapter_id")
     @JsonBackReference("chapter-quizzes")
     private CourseChapter chapter;
 
-    private int timeLimit; // in minutes
-    private double passingScore;
-    private int maxAttempts;
-    private String status; // ACTIVE, DRAFT, ARCHIVED
-    private Date createdAt;
-    private Date updatedAt;
-
-}
+    // ... existing code ...
+} 

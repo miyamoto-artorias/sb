@@ -2,6 +2,7 @@ package com.demo.sb.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ public class QuizQuestion {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id")
+    @JsonBackReference("quiz-questions")
     private Quiz quiz;
 
     private double points;
