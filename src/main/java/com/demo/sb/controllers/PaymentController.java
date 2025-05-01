@@ -62,7 +62,7 @@ public class PaymentController {
         return payment.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/byUser")
+    @PostMapping("/byUser")
     public ResponseEntity<List<PaymentResponseDto>> getPaymentsByUser(@RequestBody @Valid PaymentByUserRequest request) {
         List<Payment> payments = paymentService.getPaymentsByUser(request.getUserId());
         List<PaymentResponseDto> responseDtos = payments.stream()
