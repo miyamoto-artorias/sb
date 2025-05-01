@@ -16,6 +16,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.springframework.beans.factory.annotation.Value;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.MediaType;
+import java.net.MalformedURLException;
 
 import java.util.Optional;
 
@@ -85,5 +89,26 @@ public class UserController {
         userDto.setProfilePicture(uploadDir.resolve(fileName).toString());  // Set the full path
         UserDto updatedUserDto = userService.updateUser(userDto);
         return ResponseEntity.ok(updatedUserDto);
+    }
+
+    @GetMapping("{id}/profile-picture")
+    public ResponseEntity<Resource> getProfilePicture(@PathVariable int id) {
+        try {
+            UserDto userDto = userService.findById(id).map(UserDto::fromEntity).orElseThrow(() -> new EntityNotFoundException("User not found"));
+            String filePathStr = userDto.getProfilePicture();  // Get the full path
+            Path filePath = Paths.get(filePathStr);
+            Resource resource = new UrlResource(filePath.toUri());
+            if (resource.exists()) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG)  // Assume JPEG, adjust if needed
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (MalformedURLException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 }
