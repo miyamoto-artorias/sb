@@ -85,7 +85,8 @@ public class QuizAttemptService {
                 switch (question.getQuestionType()) {
                     case MULTIPLE_CHOICE_SINGLE:
                     case TRUE_FALSE:
-                        if (answer.equals(question.getCorrectAnswer())) {
+                        if ((question.getCorrectAnswer() != null && answer.equals(question.getCorrectAnswer())) ||
+                            (question.getCorrectAnswers() != null && question.getCorrectAnswers().contains(answer))) {
                             earnedPoints += question.getPoints();
                         }
                         break;
