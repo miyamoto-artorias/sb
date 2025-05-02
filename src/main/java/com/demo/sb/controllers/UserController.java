@@ -30,15 +30,23 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/teachers")
-    public ResponseEntity<UserDto> createTeacher(@Valid @RequestBody UserDto userDto) {
-        userDto.setUserType(UserType.TEACHER);  // Set userType on the DTO
+    public ResponseEntity<?> createTeacher(@Valid @RequestBody UserDto userDto) {
+        // Validate userType
+        if (userDto.getUserType() != null && userDto.getUserType() != UserType.TEACHER) {
+            return ResponseEntity.badRequest().body("UserType must be TEACHER for this endpoint.");
+        }
+        userDto.setUserType(UserType.TEACHER);  // Ensure it's set correctly
         UserDto createdUserDto = userService.createUser(userDto);
         return ResponseEntity.ok(createdUserDto);
     }
 
     @PostMapping("/students")
-    public ResponseEntity<UserDto> createStudent(@Valid @RequestBody UserDto userDto) {
-        userDto.setUserType(UserType.STUDENT);  // Set userType on the DTO
+    public ResponseEntity<?> createStudent(@Valid @RequestBody UserDto userDto) {
+        // Validate userType
+        if (userDto.getUserType() != null && userDto.getUserType() != UserType.STUDENT) {
+            return ResponseEntity.badRequest().body("UserType must be STUDENT for this endpoint.");
+        }
+        userDto.setUserType(UserType.STUDENT);  // Ensure it's set correctly
         UserDto createdUserDto = userService.createUser(userDto);
         return ResponseEntity.ok(createdUserDto);
     }
