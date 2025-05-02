@@ -29,6 +29,8 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    // Comment out the redundant POST /teachers endpoint
+    /*
     @PostMapping("/teachers")
     public ResponseEntity<?> createTeacher(@Valid @RequestBody UserDto userDto) {
         // Validate userType
@@ -39,7 +41,10 @@ public class UserController {
         UserDto createdUserDto = userService.createUser(userDto);
         return ResponseEntity.ok(createdUserDto);
     }
+    */
 
+    // Comment out the redundant POST /students endpoint as well
+    /*
     @PostMapping("/students")
     public ResponseEntity<?> createStudent(@Valid @RequestBody UserDto userDto) {
         // Validate userType
@@ -50,6 +55,7 @@ public class UserController {
         UserDto createdUserDto = userService.createUser(userDto);
         return ResponseEntity.ok(createdUserDto);
     }
+    */
 
     @PostMapping
     public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto userDto) {

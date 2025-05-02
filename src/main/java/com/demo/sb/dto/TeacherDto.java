@@ -1,6 +1,7 @@
 package com.demo.sb.dto;
 
 import com.demo.sb.entity.Teacher;
+import com.demo.sb.entity.UserType;
 import lombok.Data;
 import java.util.List;
 
@@ -30,19 +31,25 @@ public class TeacherDto extends UserDto {
 
     public Teacher toEntity() {
         Teacher teacher = new Teacher();
-        // Set from User fields
-        com.demo.sb.entity.User user = this.toEntity();  // From UserDto
-        teacher.setId(user.getId());
-        teacher.setUsername(user.getUsername());
-        teacher.setEmail(user.getEmail());
-        teacher.setFullName(user.getFullName());
-        teacher.setProfilePicture(user.getProfilePicture());
-        teacher.setBio(user.getBio());
-        teacher.setLocation(user.getLocation());
-        teacher.setPreferredLanguage(user.getPreferredLanguage());
-        teacher.setSocialLinks(user.getSocialLinks());
+        // Set common fields from UserDto part
+        teacher.setId(this.getId());
+        teacher.setUsername(this.getUsername());
+        teacher.setEmail(this.getEmail());
+        teacher.setPassword(this.getPassword());
+        teacher.setFullName(this.getFullName());
+        teacher.setProfilePicture(this.getProfilePicture());
+        teacher.setBio(this.getBio());
+        teacher.setLocation(this.getLocation());
+        teacher.setPreferredLanguage(this.getPreferredLanguage());
+        teacher.setSocialLinks(this.getSocialLinks());
+        teacher.setUserType(UserType.TEACHER); // Explicitly set type
+
+        // Set Teacher-specific fields
         teacher.setExpertise(this.getExpertise());
         teacher.setQualification(this.getQualification());
+        
+        // Add any other Teacher fields if they exist
+
         return teacher;
     }
 } 
