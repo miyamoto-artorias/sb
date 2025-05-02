@@ -36,7 +36,21 @@ public class UserDto {
     }
 
     public com.demo.sb.entity.User toEntity() {
-        com.demo.sb.entity.User user = new com.demo.sb.entity.User();
+        com.demo.sb.entity.User user;
+        if (this.userType == UserType.TEACHER) {
+            com.demo.sb.entity.Teacher teacher = new com.demo.sb.entity.Teacher();
+            // We'll need TeacherDto to set expertise/qualification here
+            // For now, just setting common fields. Consider enhancing TeacherDto.toEntity
+            user = teacher;
+        } else if (this.userType == UserType.STUDENT) {
+            com.demo.sb.entity.Student student = new com.demo.sb.entity.Student();
+            user = student;
+        } else {
+            // Default to User or handle other types like ADMIN if necessary
+            user = new com.demo.sb.entity.User();
+        }
+        
+        // Set common fields
         user.setId(this.id);
         user.setUsername(this.username);
         user.setEmail(this.email);
@@ -47,7 +61,7 @@ public class UserDto {
         user.setLocation(this.location);
         user.setPreferredLanguage(this.preferredLanguage);
         user.setSocialLinks(this.socialLinks);
-        user.setUserType(this.userType);
+        user.setUserType(this.userType); // Ensure userType is set on the entity
         return user;
     }
 } 
