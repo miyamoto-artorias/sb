@@ -5,6 +5,7 @@ import com.demo.sb.entity.Card;
 import com.demo.sb.entity.User;
 import com.demo.sb.repository.CardRepository;
 import com.demo.sb.repository.UserRepository;
+import com.demo.sb.dto.CardRequestDto;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,10 +18,21 @@ public class CardService {
     @Autowired private CardRepository cardRepository;
     @Autowired private UserRepository userRepository;
 
-    public Card createCard(Card card, int userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    @Transactional
+    public Card createCard(CardRequestDto cardDto) {
+        User user = userRepository.findById(cardDto.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + cardDto.getUserId()));
+        
+        if (cardRepository.existsByUser_Id(cardDto.getUserId())) {
+            throw new IllegalStateException("User already has a card associated.");
+        }
+        
+        Card card = new Card();
+        card.setPassword(cardDto.getPassword());
+        card.setValid(cardDto.isValid());
+        card.setBalance(cardDto.getBalance());
         card.setUser(user);
+        
         return cardRepository.save(card);
     }
     public Card getCardByUserId(int userId) {
