@@ -1,6 +1,6 @@
 package com.demo.sb.controllers;
 
-import com.demo.sb.dto.CourseContentRequest;
+import com.demo.sb.dto.CourseContentDTO;
 import com.demo.sb.entity.CourseContent;
 import com.demo.sb.service.CourseContentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,12 +40,12 @@ public class CourseContentController {
     public ResponseEntity<CourseContent> createJsonContent(
             @PathVariable int courseId,
             @PathVariable int chapterId,
-            @RequestBody CourseContentRequest request
+            @RequestBody CourseContentDTO courseContentDTO
     ) throws IOException {
         CourseContent content = new CourseContent();
-        content.setTitle(request.getTitle());
-        content.setContent(request.getContent());
-        content.setType(request.getType());
+        content.setTitle(courseContentDTO.getTitle());
+        content.setContent(courseContentDTO.getContent());
+        content.setType(courseContentDTO.getType());
 
         CourseContent created = contentService.createContent(content, courseId, chapterId, null);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
@@ -74,6 +74,26 @@ public class CourseContentController {
         content.setTitle(title);
         content.setType(type);
 
+        CourseContent created = contentService.createContent(content, courseId, chapterId, file);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
+    }
+
+    @PostMapping(
+            value = "/course/{courseId}/chapter/{chapterId}/upload-video",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<CourseContent> uploadVideoContent(
+            @PathVariable int courseId,
+            @PathVariable int chapterId,
+            @RequestParam("title") String title,
+            @RequestPart("file") MultipartFile file
+    ) throws IOException {
+        // Build the CourseContent entity
+        CourseContent content = new CourseContent();
+        content.setTitle(title);
+        content.setType("video");
+
+        // Use the service to handle the upload
         CourseContent created = contentService.createContent(content, courseId, chapterId, file);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
