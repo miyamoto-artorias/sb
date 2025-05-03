@@ -46,6 +46,12 @@ public class AuthController {
         response.put("username", user.getUsername());
         response.put("email", user.getEmail());
         response.put("userType", user.getUserType());
+        response.put("fullName", user.getFullName());
+        response.put("profilePicture", user.getProfilePicture());
+        response.put("bio", user.getBio());
+        response.put("location", user.getLocation());
+        response.put("preferredLanguage", user.getPreferredLanguage());
+        response.put("socialLinks", user.getSocialLinks());
 
         return ResponseEntity.ok(response);
     }
