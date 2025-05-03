@@ -1,6 +1,7 @@
 package com.demo.sb.dto;
 
 import com.demo.sb.entity.Student;
+import com.demo.sb.entity.UserType;
 import lombok.Data;
 
 @Data
@@ -24,16 +25,19 @@ public class StudentDto extends UserDto {
 
     public Student toEntity() {
         Student student = new Student();
-        com.demo.sb.entity.User user = this.toEntity();  // From UserDto
-        student.setId(user.getId());
-        student.setUsername(user.getUsername());
-        student.setEmail(user.getEmail());
-        student.setFullName(user.getFullName());
-        student.setProfilePicture(user.getProfilePicture());
-        student.setBio(user.getBio());
-        student.setLocation(user.getLocation());
-        student.setPreferredLanguage(user.getPreferredLanguage());
-        student.setSocialLinks(user.getSocialLinks());
+        // Set common fields from UserDto part
+        student.setId(this.getId());
+        student.setUsername(this.getUsername());
+        student.setEmail(this.getEmail());
+        student.setPassword(this.getPassword());
+        student.setFullName(this.getFullName());
+        student.setProfilePicture(this.getProfilePicture());
+        student.setBio(this.getBio());
+        student.setLocation(this.getLocation());
+        student.setPreferredLanguage(this.getPreferredLanguage());
+        student.setSocialLinks(this.getSocialLinks());
+        student.setUserType(UserType.STUDENT); // Explicitly set type
+
         return student;
     }
-} 
+}

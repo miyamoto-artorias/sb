@@ -4,6 +4,7 @@ import com.demo.sb.entity.Course;
 import com.demo.sb.entity.Student;
 import com.demo.sb.dto.StudentDto;
 import com.demo.sb.service.StudentService;
+import com.demo.sb.entity.UserType;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,13 +20,19 @@ public class StudentController {
     private StudentService studentService;
 
     @PostMapping
-    public ResponseEntity<StudentDto> createStudent(@Valid @RequestBody StudentDto studentDto) {
+    public ResponseEntity<?> createStudent(@Valid @RequestBody StudentDto studentDto) {
+        if (studentDto.getUserType() != UserType.STUDENT) {
+            return ResponseEntity.badRequest().body("Invalid userType. Only 'STUDENT' is allowed for this endpoint.");
+        }
         StudentDto createdStudentDto = studentService.createStudent(studentDto);
         return ResponseEntity.ok(createdStudentDto);
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<StudentDto> updateStudent(@PathVariable int id, @Valid @RequestBody StudentDto studentDto) {
+    public ResponseEntity<?> updateStudent(@PathVariable int id, @Valid @RequestBody StudentDto studentDto) {
+        if (studentDto.getUserType() != UserType.STUDENT) {
+            return ResponseEntity.badRequest().body("Invalid userType. Only 'STUDENT' is allowed for this endpoint.");
+        }
         studentDto.setId(id);  // Ensure ID is set
         StudentDto updatedStudentDto = studentService.updateStudent(studentDto);
         return ResponseEntity.ok(updatedStudentDto);
