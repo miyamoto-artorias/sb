@@ -22,18 +22,18 @@ public class TeacherController {
     private TeacherService teacherService;
 
     @PostMapping
-    public ResponseEntity<TeacherDto> createTeacher(@Valid @RequestBody TeacherDto teacherDto) {
+    public ResponseEntity<?> createTeacher(@Valid @RequestBody TeacherDto teacherDto) {
         if (teacherDto.getUserType() != UserType.TEACHER) {
-            return ResponseEntity.badRequest().body(null); // Reject if userType is not TEACHER
+            return ResponseEntity.badRequest().body("Invalid userType. Only 'TEACHER' is allowed for this endpoint.");
         }
         TeacherDto createdTeacherDto = teacherService.createTeacher(teacherDto);
         return ResponseEntity.ok(createdTeacherDto);
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<TeacherDto> updateTeacher(@PathVariable int id, @Valid @RequestBody TeacherDto teacherDto) {
+    public ResponseEntity<?> updateTeacher(@PathVariable int id, @Valid @RequestBody TeacherDto teacherDto) {
         if (teacherDto.getUserType() != UserType.TEACHER) {
-            return ResponseEntity.badRequest().body(null); // Reject if userType is not TEACHER
+            return ResponseEntity.badRequest().body("Invalid userType. Only 'TEACHER' is allowed for this endpoint.");
         }
         teacherDto.setId(id);  // Ensure ID is set
         TeacherDto updatedTeacherDto = teacherService.updateTeacher(teacherDto);
