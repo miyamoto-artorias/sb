@@ -41,9 +41,7 @@ public class Course {
 private List<Category> categories; // Changed from 'category' to 'categories'
 
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
-    @JsonManagedReference("course-quizzes")
-    private List<QCM> quizzes;
+
 
 
 
