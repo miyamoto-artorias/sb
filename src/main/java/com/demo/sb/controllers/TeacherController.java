@@ -5,6 +5,7 @@ package com.demo.sb.controllers;
 import com.demo.sb.entity.Course;
 import com.demo.sb.entity.Teacher;
 import com.demo.sb.dto.TeacherDto;
+import com.demo.sb.entity.UserType;
 import com.demo.sb.service.TeacherService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +23,18 @@ public class TeacherController {
 
     @PostMapping
     public ResponseEntity<TeacherDto> createTeacher(@Valid @RequestBody TeacherDto teacherDto) {
+        if (teacherDto.getUserType() != UserType.TEACHER) {
+            return ResponseEntity.badRequest().body(null); // Reject if userType is not TEACHER
+        }
         TeacherDto createdTeacherDto = teacherService.createTeacher(teacherDto);
         return ResponseEntity.ok(createdTeacherDto);
     }
 
     @PutMapping("{id}")
     public ResponseEntity<TeacherDto> updateTeacher(@PathVariable int id, @Valid @RequestBody TeacherDto teacherDto) {
+        if (teacherDto.getUserType() != UserType.TEACHER) {
+            return ResponseEntity.badRequest().body(null); // Reject if userType is not TEACHER
+        }
         teacherDto.setId(id);  // Ensure ID is set
         TeacherDto updatedTeacherDto = teacherService.updateTeacher(teacherDto);
         return ResponseEntity.ok(updatedTeacherDto);
