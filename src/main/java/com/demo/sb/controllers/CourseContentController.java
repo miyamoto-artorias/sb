@@ -5,6 +5,7 @@ import com.demo.sb.entity.CourseContent;
 import com.demo.sb.service.CourseContentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -130,6 +131,22 @@ public class CourseContentController {
                 .body(resource);
     }
 
+    @GetMapping("/course/{courseId}/chapter/{chapterId}/stream-video/{contentId}")
+    public ResponseEntity<Resource> streamVideo(
+            @PathVariable int courseId,
+            @PathVariable int chapterId,
+            @PathVariable int contentId,
+            @RequestHeader(value = HttpHeaders.RANGE, required = false) String rangeHeader
+    ) throws IOException {
+        CourseContent content = contentService.getContentById(contentId);
+
+        File videoFile = new File(content.getContent());
+        if (!videoFile.exists() || !videoFile.isFile()) {
+            throw new IllegalArgumentException("Video file not found");
+        }
+
+        return contentService.prepareVideoStream(videoFile, rangeHeader);
+    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {

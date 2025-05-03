@@ -7,7 +7,14 @@ import com.demo.sb.repository.CourseChapterRepository;
 import com.demo.sb.repository.CourseContentRepository;
 import com.demo.sb.repository.CourseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRange;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.transaction.Transactional;
@@ -102,5 +109,33 @@ public class CourseContentService {
     public CourseContent getContentById(int id) {
         return contentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Content with ID " + id + " not found"));
+    }
+
+    public ResponseEntity<Resource> prepareVideoStream(File videoFile, String rangeHeader) throws IOException {
+        long fileLength = videoFile.length();
+        HttpHeaders headers = new HttpHeaders();
+
+        if (StringUtils.hasText(rangeHeader)) {
+            List<HttpRange> ranges = HttpRange.parseRanges(rangeHeader);
+            HttpRange range = ranges.get(0);
+            long start = range.getRangeStart(fileLength);
+            long end = range.getRangeEnd(fileLength);
+
+            long contentLength = end - start + 1;
+            headers.add(HttpHeaders.CONTENT_RANGE, "bytes " + start + "-" + end + "/" + fileLength);
+            headers.setContentLength(contentLength);
+            headers.set(HttpHeaders.ACCEPT_RANGES, "bytes");
+
+            return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+                    .headers(headers)
+                    .body(new FileSystemResource(videoFile));
+        } else {
+            headers.setContentLength(fileLength);
+            headers.set(HttpHeaders.ACCEPT_RANGES, "bytes");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(new FileSystemResource(videoFile));
+        }
     }
 }
