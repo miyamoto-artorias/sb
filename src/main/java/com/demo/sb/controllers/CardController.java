@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 import com.demo.sb.dto.CardRequestDto;
@@ -80,6 +81,26 @@ public class CardController {
         try {
             Card updatedCard = cardService.updateCardUserId(cardId, newUserId);
             return ResponseEntity.ok(CardResponseDto.fromEntity(updatedCard));
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/validate-card")
+    public ResponseEntity<CardResponseDto> getCardByCardNumberAndPassword(@RequestBody Map<String, String> request) {
+        String cardNumber = request.get("cardNumber");
+        String password = request.get("password");
+
+        if (cardNumber == null || password == null) {
+            return ResponseEntity.badRequest().body(null); // Return 400 if parameters are missing
+        }
+
+        try {
+            Card card = cardService.getCardByCardNumber(cardNumber);
+            if (!card.getPassword().equals(password)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); // Return 401 if password is incorrect
+            }
+            return ResponseEntity.ok(CardResponseDto.fromEntity(card));
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.notFound().build();
         }
