@@ -20,7 +20,7 @@ public class Card {
 
     private float balance;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 4)
     private String cardNumber;
 
     @OneToOne(fetch = FetchType.LAZY)

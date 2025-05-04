@@ -74,4 +74,14 @@ public class CardController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @PutMapping("/{cardId}/user/{newUserId}")
+    public ResponseEntity<CardResponseDto> updateCardUserId(@PathVariable int cardId, @PathVariable int newUserId) {
+        try {
+            Card updatedCard = cardService.updateCardUserId(cardId, newUserId);
+            return ResponseEntity.ok(CardResponseDto.fromEntity(updatedCard));
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
