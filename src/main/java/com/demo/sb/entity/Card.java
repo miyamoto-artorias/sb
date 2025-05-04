@@ -20,10 +20,8 @@ public class Card {
 
     private float balance;
 
-
-
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JoinColumn(name = "user_id", nullable = true, unique = true)
     @JsonIgnoreProperties({"card", "hibernateLazyInitializer", "handler"})
     private User user; // The owner of the card
 
