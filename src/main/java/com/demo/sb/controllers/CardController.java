@@ -54,4 +54,24 @@ public class CardController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/card-number/{cardNumber}")
+    public ResponseEntity<CardResponseDto> getCardByCardNumber(@PathVariable String cardNumber) {
+        try {
+            Card card = cardService.getCardByCardNumber(cardNumber);
+            return ResponseEntity.ok(CardResponseDto.fromEntity(card));
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/card-number/{cardNumber}/balance")
+    public ResponseEntity<CardResponseDto> updateCardBalanceByCardNumber(@PathVariable String cardNumber, @RequestParam float amount) {
+        try {
+            Card updatedCard = cardService.updateCardBalanceByCardNumber(cardNumber, amount);
+            return ResponseEntity.ok(CardResponseDto.fromEntity(updatedCard));
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

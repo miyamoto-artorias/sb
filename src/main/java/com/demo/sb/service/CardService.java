@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class CardService {
@@ -32,6 +33,7 @@ public class CardService {
         card.setValid(cardDto.isValid());
         card.setBalance(cardDto.getBalance());
         card.setUser(user);
+        card.setCardNumber(UUID.randomUUID().toString()); // Generate a unique card number
         
         return cardRepository.save(card);
     }
@@ -53,4 +55,15 @@ public class CardService {
         return cardRepository.save(card);
     }
 
+    public Card getCardByCardNumber(String cardNumber) {
+        return cardRepository.findByCardNumber(cardNumber)
+                .orElseThrow(() -> new EntityNotFoundException("Card not found with card number: " + cardNumber));
+    }
+
+    @Transactional
+    public Card updateCardBalanceByCardNumber(String cardNumber, float amount) {
+        Card card = getCardByCardNumber(cardNumber);
+        card.setBalance(card.getBalance() + amount);
+        return cardRepository.save(card);
+    }
 }
