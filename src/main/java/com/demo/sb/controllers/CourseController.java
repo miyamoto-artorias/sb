@@ -32,6 +32,7 @@ public class CourseController {
         course.setDescription(courseDto.getDescription());
         course.setPicture(courseDto.getPicture());
         course.setPrice(courseDto.getPrice());
+        course.setTags(courseDto.getTags());
 
         // Map category IDs to actual Category entities
         List<Category> categories = categoryRepository.findAllById(courseDto.getCategoryIds());
@@ -40,10 +41,6 @@ public class CourseController {
         Course createdCourse = courseService.createCourse(course, teacherId);
         return ResponseEntity.ok(createdCourse);
     }
-
-
-
-
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getCourseById(@PathVariable int id) {
@@ -56,14 +53,12 @@ public class CourseController {
         }
     }
 
-
-
-
     @GetMapping("/teacher/{teacherId}")
     public ResponseEntity<List<Course>> getCoursesByTeacher(@PathVariable int teacherId) {
         List<Course> courses = courseService.getCoursesByTeacher(teacherId);
         return ResponseEntity.ok(courses);
     }
+    
     @GetMapping
     public ResponseEntity<List<Course>> getAllCourses() {
         List<Course> courses = courseService.getAllCourses();

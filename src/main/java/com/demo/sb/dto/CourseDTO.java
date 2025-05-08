@@ -8,6 +8,7 @@ public class CourseDTO {
     private String picture;
     private float price;
     private List<Integer> categoryIds; // IDs of categories
+    private List<String> tags; // Tags for the course
 
     // Getters and Setters
     public String getTitle() {
@@ -48,5 +49,13 @@ public class CourseDTO {
 
     public void setCategoryIds(List<Integer> categoryIds) {
         this.categoryIds = categoryIds;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 }

@@ -41,7 +41,13 @@ public class Course {
 private List<Category> categories; // Changed from 'category' to 'categories'
 
 
-
+    @ElementCollection
+    @CollectionTable(
+        name = "course_tags", 
+        joinColumns = @JoinColumn(name = "course_id")
+    )
+    @Column(name = "tag")
+    private List<String> tags;
 
 
 
