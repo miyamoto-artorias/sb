@@ -19,7 +19,7 @@ public class Category {
     @Column(nullable = false)
     private String title;
 
-    private String description;
+        private String description;
 
     @ManyToMany(mappedBy = "categories")
     @JsonIgnore // ✅ Use this instead

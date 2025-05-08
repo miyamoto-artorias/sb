@@ -15,7 +15,7 @@ public class Payment {
 
     private float amount;
 
-    private LocalDateTime date;
+        private LocalDateTime date;
 
     private String status; // e.g., "pending", "completed"
 

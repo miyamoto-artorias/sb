@@ -84,7 +84,7 @@ public class UserController {
         return ResponseEntity.ok(updatedUserDto);
     }
 
-    @PostMapping("{id}/upload-profile-picture")
+        @PostMapping("{id}/upload-profile-picture")
     public ResponseEntity<UserDto> uploadProfilePicture(@PathVariable int id, @RequestParam("file") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body(null);
