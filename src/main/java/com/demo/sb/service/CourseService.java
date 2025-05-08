@@ -10,8 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -41,5 +44,31 @@ public class CourseService {
 
     public List<Course> getAllCourses() {
         return courseRepository.findAll();
+    }
+    
+    public List<Course> searchCourses(String searchTerm) {
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
+            return getAllCourses();
+        }
+        
+        searchTerm = searchTerm.trim();
+        
+        // Combine results from all search methods
+        Set<Course> courseResults = new HashSet<>();
+        
+        // Search by title
+        courseResults.addAll(courseRepository.findByTitleContainingIgnoreCase(searchTerm));
+        
+        // Search by description
+        courseResults.addAll(courseRepository.findByDescriptionContainingIgnoreCase(searchTerm));
+        
+        // Search by category name - updated method name
+        courseResults.addAll(courseRepository.findByCategoryName(searchTerm));
+        
+        // Search by tags - updated method name
+        courseResults.addAll(courseRepository.findByTagsContaining(searchTerm));
+        
+        // Convert Set back to List
+        return courseResults.stream().collect(Collectors.toList());
     }
 }

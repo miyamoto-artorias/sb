@@ -12,8 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/courses")
@@ -63,5 +65,33 @@ public class CourseController {
     public ResponseEntity<List<Course>> getAllCourses() {
         List<Course> courses = courseService.getAllCourses();
         return ResponseEntity.ok(courses);
+    }
+    
+    @GetMapping("/search")
+    public ResponseEntity<List<CourseDTO>> searchCourses(@RequestParam String query) {
+        List<Course> courses = courseService.searchCourses(query);
+        List<CourseDTO> courseDTOs = convertToCourseDTOs(courses);
+        return ResponseEntity.ok(courseDTOs);
+    }
+    
+    private List<CourseDTO> convertToCourseDTOs(List<Course> courses) {
+        return courses.stream().map(course -> {
+            CourseDTO dto = new CourseDTO();
+            dto.setTitle(course.getTitle());
+            dto.setDescription(course.getDescription());
+            dto.setPicture(course.getPicture());
+            dto.setPrice(course.getPrice());
+            dto.setTags(course.getTags());
+            
+            // Extract category IDs
+            List<Integer> categoryIds = course.getCategories() != null ?
+                course.getCategories().stream()
+                    .map(Category::getId)
+                    .collect(Collectors.toList()) :
+                new ArrayList<>();
+            dto.setCategoryIds(categoryIds);
+            
+            return dto;
+        }).collect(Collectors.toList());
     }
 }
