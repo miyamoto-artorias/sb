@@ -37,13 +37,16 @@ public class CourseService {
         teacherRepository.findById(teacherId)
                 .orElseThrow(() -> new EntityNotFoundException("Teacher with ID " + teacherId + " not found"));
         return courseRepository.findByTeacherId(teacherId);
-    }
-
-    @Transactional
+    }    @Transactional
     public Course createCourseForRequest(int courseRequestId, int teacherId, CourseDTO courseDto) {
         // Validate and retrieve the course request
         CourseRequest courseRequest = courseRequestRepository.findById(courseRequestId)
                 .orElseThrow(() -> new EntityNotFoundException("Course request not found"));
+                
+        // Check if the course request status is "accepted"
+        if (!"accepted".equalsIgnoreCase(courseRequest.getStatus())) {
+            throw new IllegalStateException("Course request status must be 'accepted' to create a course");
+        }
 
         // Create a new course
         Course course = new Course();
@@ -52,6 +55,10 @@ public class CourseService {
         course.setPicture(courseDto.getPicture());
         course.setPrice(courseDto.getPrice());
         course.setTags(courseDto.getTags());
+        course.setPublic(false); // Set isPublic to false for requested courses
+        
+        // Link the course to the courseRequest
+        course.setCourseRequest(courseRequest);
 
         // Map category IDs to actual Category entities
         List<Category> categories = categoryRepository.findAllById(courseDto.getCategoryIds());
@@ -61,8 +68,15 @@ public class CourseService {
         Teacher teacher = teacherRepository.findById(teacherId)
                 .orElseThrow(() -> new EntityNotFoundException("Teacher not found"));
         course.setTeacher(teacher);
+        
+        Course savedCourse = courseRepository.save(course);
+        
+        // Update course request status to indicate a course has been created
+        courseRequest.setCreatedCourse(savedCourse);
+        courseRequest.setStatus("done");
+        courseRequestRepository.save(courseRequest);
 
-        return courseRepository.save(course);
+        return savedCourse;
     }
 
     public Course getCourseById(int id) {
