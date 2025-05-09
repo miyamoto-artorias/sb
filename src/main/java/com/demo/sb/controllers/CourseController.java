@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -94,14 +95,32 @@ public class CourseController {
             return dto;
         }).collect(Collectors.toList());
     }
-    
-    @PostMapping("/request/{courseRequestId}/teacher/{teacherId}")
+      @PostMapping("/request/{courseRequestId}/teacher/{teacherId}")
     public ResponseEntity<?> createCourseForRequest(@PathVariable int courseRequestId,
                                                     @PathVariable int teacherId,
                                                     @RequestBody CourseDTO courseDto) {
         try {
             Course course = courseService.createCourseForRequest(courseRequestId, teacherId, courseDto);
-            return ResponseEntity.ok(course);
+            
+            // Convert to DTO to avoid serialization issues with lazy-loaded associations
+            CourseDTO responseDto = new CourseDTO();
+            responseDto.setTitle(course.getTitle());
+            responseDto.setDescription(course.getDescription());
+            responseDto.setPicture(course.getPicture());
+            responseDto.setPrice(course.getPrice());
+            responseDto.setTags(course.getTags());
+            
+            // Add course ID to the response
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", course.getId());
+            response.put("title", course.getTitle());
+            response.put("description", course.getDescription());
+            response.put("picture", course.getPicture());
+            response.put("price", course.getPrice());
+            response.put("isPublic", course.isPublic());
+            response.put("message", "Course successfully created for request");
+            
+            return ResponseEntity.ok(response);
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", ex.getMessage()));
