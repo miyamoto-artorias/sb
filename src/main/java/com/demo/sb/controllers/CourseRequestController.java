@@ -1,7 +1,6 @@
 package com.demo.sb.controllers;
 
-
-import com.demo.sb.entity.CourseRequest;
+import com.demo.sb.dto.CourseRequestDTO;
 import com.demo.sb.service.CourseRequestService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/course-requests")
@@ -18,32 +16,50 @@ public class CourseRequestController {
     private CourseRequestService courseRequestService;
 
     @PostMapping
-    public ResponseEntity<CourseRequest> createCourseRequest(@Valid @RequestBody CourseRequest request) {
-        CourseRequest savedRequest = courseRequestService.createCourseRequest(request); // Assume this method exists
+    public ResponseEntity<CourseRequestDTO> createCourseRequest(@Valid @RequestBody CourseRequestDTO requestDTO) {
+        CourseRequestDTO savedRequest = courseRequestService.createCourseRequest(requestDTO);
         return ResponseEntity.ok(savedRequest);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CourseRequest> getCourseRequestById(@PathVariable int id) {
-        Optional<CourseRequest> request = courseRequestService.findById(id); // Assume this method exists
-        return request.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<CourseRequestDTO> getCourseRequestById(@PathVariable int id) {
+        try {
+            CourseRequestDTO request = courseRequestService.findById(id);
+            return ResponseEntity.ok(request);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/teacher/{teacherId}")
-    public ResponseEntity<List<CourseRequest>> getRequestsByTeacher(@PathVariable int teacherId) {
-        List<CourseRequest> requests = courseRequestService.getRequestsByTeacher(teacherId); // Assume this method exists
+    public ResponseEntity<List<CourseRequestDTO>> getRequestsByTeacher(@PathVariable int teacherId) {
+        List<CourseRequestDTO> requests = courseRequestService.getRequestsByTeacher(teacherId);
+        return ResponseEntity.ok(requests);
+    }
+    
+    @GetMapping("/student/{studentId}")
+    public ResponseEntity<List<CourseRequestDTO>> getRequestsByStudent(@PathVariable int studentId) {
+        List<CourseRequestDTO> requests = courseRequestService.getRequestsByStudent(studentId);
         return ResponseEntity.ok(requests);
     }
 
     @PostMapping("/{id}/accept")
     public ResponseEntity<Void> acceptRequest(@PathVariable int id) {
-        courseRequestService.acceptRequest(id); // Assume this method exists
-        return ResponseEntity.ok().build();
+        try {
+            courseRequestService.acceptRequest(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping("/{id}/reject")
     public ResponseEntity<Void> rejectRequest(@PathVariable int id) {
-        courseRequestService.rejectRequest(id); // Assume this method exists
-        return ResponseEntity.ok().build();
+        try {
+            courseRequestService.rejectRequest(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
