@@ -30,6 +30,12 @@ public class TeacherController {
         return ResponseEntity.ok(createdTeacherDto);
     }
 
+    @GetMapping
+    public ResponseEntity<List<TeacherDto>> getAllTeachers() {
+        List<TeacherDto> teachers = teacherService.getAllTeachers();
+        return ResponseEntity.ok(teachers);
+    }
+
     @PutMapping("{id}")
     public ResponseEntity<?> updateTeacher(@PathVariable int id, @Valid @RequestBody TeacherDto teacherDto) {
         if (teacherDto.getUserType() != UserType.TEACHER) {

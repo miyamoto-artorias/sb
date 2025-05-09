@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.demo.sb.dto.TeacherDto;
 import jakarta.persistence.EntityNotFoundException;
@@ -38,6 +39,13 @@ public class TeacherService {
 
     public Optional<Teacher> findById(int id) {
         return teacherRepository.findById(id);
+    }
+    
+    public List<TeacherDto> getAllTeachers() {
+        List<Teacher> teachers = teacherRepository.findAll();
+        return teachers.stream()
+                .map(TeacherDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
     public List<Course> getUploadedCourses(int teacherId) {
