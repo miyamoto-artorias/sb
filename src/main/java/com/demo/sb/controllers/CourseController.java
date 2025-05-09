@@ -94,4 +94,20 @@ public class CourseController {
             return dto;
         }).collect(Collectors.toList());
     }
+    
+    @PostMapping("/request/{courseRequestId}/teacher/{teacherId}")
+    public ResponseEntity<?> createCourseForRequest(@PathVariable int courseRequestId,
+                                                    @PathVariable int teacherId,
+                                                    @RequestBody CourseDTO courseDto) {
+        try {
+            Course course = courseService.createCourseForRequest(courseRequestId, teacherId, courseDto);
+            return ResponseEntity.ok(course);
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", ex.getMessage()));
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", ex.getMessage()));
+        }
+    }
 }

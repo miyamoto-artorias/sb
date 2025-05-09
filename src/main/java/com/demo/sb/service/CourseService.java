@@ -1,9 +1,14 @@
 package com.demo.sb.service;
 
 
+import com.demo.sb.dto.CourseDTO;
+import com.demo.sb.entity.Category;
 import com.demo.sb.entity.Course;
+import com.demo.sb.entity.CourseRequest;
 import com.demo.sb.entity.Teacher;
+import com.demo.sb.repository.CategoryRepository;
 import com.demo.sb.repository.CourseRepository;
+import com.demo.sb.repository.CourseRequestRepository;
 import com.demo.sb.repository.TeacherRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +21,8 @@ import java.util.List;
 public class CourseService {
     @Autowired private CourseRepository courseRepository;
     @Autowired private TeacherRepository teacherRepository;
+    @Autowired private CourseRequestRepository courseRequestRepository;
+    @Autowired private CategoryRepository categoryRepository;
 
     @Transactional
     public Course createCourse(Course course, int teacherId) {
@@ -30,6 +37,32 @@ public class CourseService {
         teacherRepository.findById(teacherId)
                 .orElseThrow(() -> new EntityNotFoundException("Teacher with ID " + teacherId + " not found"));
         return courseRepository.findByTeacherId(teacherId);
+    }
+
+    @Transactional
+    public Course createCourseForRequest(int courseRequestId, int teacherId, CourseDTO courseDto) {
+        // Validate and retrieve the course request
+        CourseRequest courseRequest = courseRequestRepository.findById(courseRequestId)
+                .orElseThrow(() -> new EntityNotFoundException("Course request not found"));
+
+        // Create a new course
+        Course course = new Course();
+        course.setTitle(courseDto.getTitle());
+        course.setDescription(courseDto.getDescription());
+        course.setPicture(courseDto.getPicture());
+        course.setPrice(courseDto.getPrice());
+        course.setTags(courseDto.getTags());
+
+        // Map category IDs to actual Category entities
+        List<Category> categories = categoryRepository.findAllById(courseDto.getCategoryIds());
+        course.setCategories(categories);
+
+        // Set the teacher
+        Teacher teacher = teacherRepository.findById(teacherId)
+                .orElseThrow(() -> new EntityNotFoundException("Teacher not found"));
+        course.setTeacher(teacher);
+
+        return courseRepository.save(course);
     }
 
     public Course getCourseById(int id) {

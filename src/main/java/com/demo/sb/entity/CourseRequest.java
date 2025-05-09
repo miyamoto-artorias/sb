@@ -38,5 +38,11 @@ private List<Category> categories; // Changed from 'category' to 'categories'
 
     private float price;
 
-    private String status; // e.g., "pending", "accepted", "rejected"
+    private String status; // e.g., "accepted", "rejected" , "done"
+
+
+        @OneToOne(mappedBy = "courseRequest", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties({"courseRequest", "hibernateLazyInitializer", "handler"})
+    private Course createdCourse;
+
 }

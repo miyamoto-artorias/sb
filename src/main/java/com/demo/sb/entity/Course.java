@@ -55,5 +55,14 @@ private List<Category> categories; // Changed from 'category' to 'categories'
     @JsonManagedReference("course-chapters")
     private List<CourseChapter> chapters;
 
+    @Column(nullable = false)
+    private boolean isPublic = true; // Default to true for regular courses
+
+
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_request_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private CourseRequest courseRequest;
 
 }
