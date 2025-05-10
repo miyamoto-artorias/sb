@@ -10,6 +10,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.Random;
@@ -17,6 +19,8 @@ import java.util.UUID;
 
 @Service
 public class CardService {
+    private static final Logger logger = LoggerFactory.getLogger(CardService.class);
+    
     @Autowired private CardRepository cardRepository;
     @Autowired private UserRepository userRepository;
 
@@ -41,34 +45,74 @@ public class CardService {
         
         return cardRepository.save(card);
     }
+    
     public Card getCardByUserId(int userId) {
+        logger.info("Fetching card for user ID: {}", userId);
         return cardRepository.findByUser_Id(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Card not found for user ID: " + userId));
+                .orElseThrow(() -> {
+                    logger.error("Card not found for user ID: {}", userId);
+                    return new EntityNotFoundException("Card not found for user ID: " + userId);
+                });
     }
 
-
     public Card getCard(int id) {
+        logger.info("Fetching card with ID: {}", id);
         return cardRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Card not found"));
+                .orElseThrow(() -> {
+                    logger.error("Card not found with ID: {}", id);
+                    return new EntityNotFoundException("Card not found with ID: " + id);
+                });
     }
 
     @Transactional
     public Card updateCardBalance(int cardId, float amount) {
+        logger.info("Updating balance for card ID: {} by amount: {}", cardId, amount);
+        
         Card card = getCard(cardId);
-        card.setBalance(card.getBalance() + amount);
-        return cardRepository.save(card);
+        float oldBalance = card.getBalance();
+        float newBalance = oldBalance + amount;
+        
+        // Ensure balance doesn't go negative
+        if (newBalance < 0) {
+            logger.error("Cannot update balance to negative value. Card ID: {}, Current: {}, Change: {}", 
+                    cardId, oldBalance, amount);
+            throw new IllegalArgumentException("Card balance cannot be negative");
+        }
+        
+        card.setBalance(newBalance);
+        Card updatedCard = cardRepository.save(card);
+        logger.info("Updated card ID: {} balance from {} to {}", cardId, oldBalance, updatedCard.getBalance());
+        
+        return updatedCard;
     }
 
     public Card getCardByCardNumber(String cardNumber) {
+        logger.info("Fetching card with card number: {}", cardNumber);
         return cardRepository.findByCardNumber(cardNumber)
-                .orElseThrow(() -> new EntityNotFoundException("Card not found with card number: " + cardNumber));
+                .orElseThrow(() -> {
+                    logger.error("Card not found with card number: {}", cardNumber);
+                    return new EntityNotFoundException("Card not found with card number: " + cardNumber);
+                });
     }
 
     @Transactional
     public Card updateCardBalanceByCardNumber(String cardNumber, float amount) {
+        logger.info("Updating balance for card number: {} by amount: {}", cardNumber, amount);
         Card card = getCardByCardNumber(cardNumber);
-        card.setBalance(card.getBalance() + amount);
-        return cardRepository.save(card);
+        float oldBalance = card.getBalance();
+        float newBalance = oldBalance + amount;
+        
+        if (newBalance < 0) {
+            logger.error("Cannot update balance to negative value. Card number: {}, Current: {}, Change: {}", 
+                    cardNumber, oldBalance, amount);
+            throw new IllegalArgumentException("Card balance cannot be negative");
+        }
+        
+        card.setBalance(newBalance);
+        Card updatedCard = cardRepository.save(card);
+        logger.info("Updated card number: {} balance from {} to {}", cardNumber, oldBalance, updatedCard.getBalance());
+        
+        return updatedCard;
     }
 
     @Transactional

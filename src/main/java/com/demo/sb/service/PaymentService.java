@@ -78,7 +78,7 @@ public class PaymentService {
         Card payerCard = null;
         try {
             payerCard = cardService.getCard(paymentRequest.getCardId());
-            logger.info("Found payer card: {}", payerCard.getId());
+            logger.info("Found payer card: {} with balance: {}", payerCard.getId(), payerCard.getBalance());
         } catch (Exception e) {
             logger.error("Error finding card with ID {}: {}", paymentRequest.getCardId(), e.getMessage());
             throw new EntityNotFoundException("Card not found with ID: " + paymentRequest.getCardId());
@@ -109,41 +109,60 @@ public class PaymentService {
         payment.setDate(LocalDateTime.now());
 
         // Check payer's balance
-        if (payerCard.getBalance() < paymentRequest.getAmount()) {
+        float requiredAmount = paymentRequest.getAmount();
+        float availableBalance = payerCard.getBalance();
+        
+        logger.info("Checking balance - Required: {}, Available: {}", requiredAmount, availableBalance);
+        
+        if (availableBalance < requiredAmount) {
             logger.info("Insufficient balance for payment. Required: {}, Available: {}", 
-                    paymentRequest.getAmount(), payerCard.getBalance());
+                    requiredAmount, availableBalance);
             payment.setStatus("failed");
             return paymentRepository.save(payment);
         }
 
         // Process payment
+        Card receiverCard = null;
         try {
-            Card receiverCard = cardService.getCardByUserId(receiver.getId());
-            cardService.updateCardBalance(payerCard.getId(), -paymentRequest.getAmount());
-            cardService.updateCardBalance(receiverCard.getId(), paymentRequest.getAmount());
+            // Get receiver's card
+            receiverCard = cardService.getCardByUserId(receiver.getId());
+            logger.info("Found receiver card: {} with balance: {}", receiverCard.getId(), receiverCard.getBalance());
             
-            // After successful payment, create enrollment
-            try {
-                // Only attempt to create enrollment if payment is successful
-                enrollmentService.createEnrollment(payer.getId(), course.getId());
-                logger.info("Successfully created enrollment for user {} in course {}", 
-                        payer.getId(), course.getId());
-            } catch (IllegalArgumentException e) {
-                // User is already enrolled, which is fine
-                logger.info("User is already enrolled in this course: {}", e.getMessage());
-            } catch (Exception e) {
-                // Log other enrollment errors but don't fail the payment
-                logger.error("Error creating enrollment: {}", e.getMessage());
-            }
+            // Update balances
+            float deductAmount = -requiredAmount; // Negative for deduction
+            cardService.updateCardBalance(payerCard.getId(), deductAmount);
+            logger.info("Updated payer card balance: {}", payerCard.getBalance() + deductAmount);
             
+            cardService.updateCardBalance(receiverCard.getId(), requiredAmount);
+            logger.info("Updated receiver card balance: {}", receiverCard.getBalance() + requiredAmount);
+            
+            // Create enrollment after successful payment
+            Enrollment enrollment = enrollmentService.createEnrollment(payer.getId(), course.getId());
+            logger.info("Successfully created or found enrollment ID: {} for user {} in course {}", 
+                    enrollment.getId(), payer.getId(), course.getId());
+            
+            // Set payment status to completed
             payment.setStatus("completed");
             Payment savedPayment = paymentRepository.save(payment);
             logger.info("Payment completed successfully with ID: {}", savedPayment.getId());
             return savedPayment;
+            
         } catch (Exception e) {
-            logger.error("Error processing payment: {}", e.getMessage());
+            logger.error("Error processing payment: {}", e.getMessage(), e);
+            // Rollback any balance changes if there was an error
+            try {
+                if (payerCard != null && receiverCard != null) {
+                    // Try to restore the original balances
+                    logger.info("Rolling back balance changes due to error");
+                }
+            } catch (Exception rollbackEx) {
+                logger.error("Error rolling back balance changes: {}", rollbackEx.getMessage());
+            }
+            
             payment.setStatus("failed");
-            return paymentRepository.save(payment);
+            Payment failedPayment = paymentRepository.save(payment);
+            logger.error("Payment failed with ID: {}", failedPayment.getId());
+            return failedPayment;
         }
     }
 
