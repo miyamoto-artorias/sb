@@ -15,24 +15,36 @@ import java.util.stream.Collectors;
 
 import com.demo.sb.dto.PaymentByUserRequest;
 import com.demo.sb.dto.PaymentResponseDto;
+import com.demo.sb.dto.PaymentDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/payments")
 public class PaymentController {
+    private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
+    
     @Autowired
     private PaymentService paymentService;
 
-
-    // In PaymentController.java
+    // Updated to use PaymentDTO for response
     @PostMapping
     public ResponseEntity<?> createPayment(@RequestBody PaymentRequest paymentRequest) {
+        logger.info("Received payment request: {}", paymentRequest);
         try {
             Payment savedPayment = paymentService.createPayment(paymentRequest);
-            return ResponseEntity.ok(savedPayment);
+            PaymentDTO paymentDTO = PaymentDTO.fromEntity(savedPayment);
+            logger.info("Payment processed successfully: {}", paymentDTO.getId());
+            return ResponseEntity.ok(paymentDTO);
         } catch (EntityNotFoundException ex) {
+            logger.error("Entity not found: {}", ex.getMessage());
             return ResponseEntity.notFound().build();
         } catch (IllegalArgumentException ex) {
+            logger.error("Invalid argument: {}", ex.getMessage());
             return ResponseEntity.badRequest().body(ex.getMessage());
+        } catch (Exception ex) {
+            logger.error("Error processing payment: {}", ex.getMessage());
+            return ResponseEntity.internalServerError().body("Error processing payment: " + ex.getMessage());
         }
     }
 
@@ -55,11 +67,20 @@ public class PaymentController {
     }
     */
 
-
     @GetMapping("/{id}")
-    public ResponseEntity<Payment> getPaymentById(@PathVariable int id) {
-        Optional<Payment> payment = paymentService.findById(id);
-        return payment.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<?> getPaymentById(@PathVariable int id) {
+        try {
+            Optional<Payment> payment = paymentService.findById(id);
+            if (payment.isPresent()) {
+                PaymentDTO paymentDTO = PaymentDTO.fromEntity(payment.get());
+                return ResponseEntity.ok(paymentDTO);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception ex) {
+            logger.error("Error retrieving payment: {}", ex.getMessage());
+            return ResponseEntity.internalServerError().body("Error retrieving payment");
+        }
     }
 
     @PostMapping("/byUser")

@@ -1,21 +1,25 @@
 package com.demo.sb.entity;
 
-public class PaymentRequest {
-    private float amount;
-    private int payerId;
-    private int receiverId;
-    private int courseId;
-    private int cardId;
+import lombok.Data;
+import lombok.ToString;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
-    // Getters and setters
-    public float getAmount() { return amount; }
-    public void setAmount(float amount) { this.amount = amount; }
-    public int getPayerId() { return payerId; }
-    public void setPayerId(int payerId) { this.payerId = payerId; }
-    public int getReceiverId() { return receiverId; }
-    public void setReceiverId(int receiverId) { this.receiverId = receiverId; }
-    public int getCourseId() { return courseId; }
-    public void setCourseId(int courseId) { this.courseId = courseId; }
-    public int getCardId() { return cardId; }
-    public void setCardId(int cardId) { this.cardId = cardId; }
+@Data
+@ToString
+public class PaymentRequest {
+    @Positive(message = "Amount must be positive")
+    private float amount;
+    
+    @NotNull(message = "Payer ID is required")
+    private Integer payerId;
+    
+    @NotNull(message = "Receiver ID is required")
+    private Integer receiverId;
+    
+    @NotNull(message = "Course ID is required")
+    private Integer courseId;
+    
+    @NotNull(message = "Card ID is required")
+    private Integer cardId;
 }

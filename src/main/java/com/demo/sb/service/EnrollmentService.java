@@ -32,23 +32,31 @@ public class EnrollmentService {
 
     @Transactional
     public Enrollment createEnrollment(Integer userId, Integer courseId) {
-        // Check for existing enrollment first
-        if (enrollmentRepository.existsByUser_IdAndCourse_Id(userId, courseId)) {
-            throw new IllegalArgumentException("User is already enrolled in this course");
+        try {
+            // Check for existing enrollment first - if it exists, return it
+            Optional<Enrollment> existingEnrollment = enrollmentRepository.findByUser_IdAndCourse_Id(userId, courseId);
+            if (existingEnrollment.isPresent()) {
+                return existingEnrollment.get();
+            }
+
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+            Course course = courseRepository.findById(courseId)
+                    .orElseThrow(() -> new RuntimeException("Course not found with ID: " + courseId));
+
+            Enrollment enrollment = new Enrollment();
+            enrollment.setUser(user);
+            enrollment.setCourse(course);
+            enrollment.setProgress(0.0f);
+            enrollment.setPoints(0);
+
+            return enrollmentRepository.save(enrollment);
+        } catch (Exception e) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            throw new RuntimeException("Error creating enrollment: " + e.getMessage(), e);
         }
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Course not found"));
-
-        Enrollment enrollment = new Enrollment();
-        enrollment.setUser(user);
-        enrollment.setCourse(course);
-        enrollment.setProgress(0.0f);
-        enrollment.setPoints(0);
-
-        return enrollmentRepository.save(enrollment);
     }
     /*public List<Enrollment> getAllEnrollments() {
         return enrollmentRepository.findAll();
