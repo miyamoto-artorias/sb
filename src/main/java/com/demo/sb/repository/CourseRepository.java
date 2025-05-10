@@ -43,4 +43,8 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
         "                     AND LOWER(t.tag) LIKE CONCAT('%', LOWER(st.term), '%')))", 
         nativeQuery = true)
     List<Course> fullTextSearch(@Param("searchTerms") String searchTerms);
+
+    // Find courses where the associated course request has the specified teacher ID
+    @Query("SELECT c FROM Course c WHERE c.courseRequest.teacher.id = :teacherId")
+    List<Course> findByRequestTeacherId(@Param("teacherId") int teacherId);
 }

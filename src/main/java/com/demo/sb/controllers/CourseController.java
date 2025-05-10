@@ -398,4 +398,152 @@ public class CourseController {
                     .body(Map.of("error", ex.getMessage()));
         }
     }
+
+    /**
+     * Get all courses where the associated request is assigned to a specific teacher
+     * @param teacherId The ID of the teacher who handled the requests
+     * @return A list of courses created from requests assigned to this teacher
+     */
+    @GetMapping("/request-teacher/{teacherId}")
+    public ResponseEntity<List<Map<String, Object>>> getCoursesByRequestTeacherId(@PathVariable int teacherId) {
+        List<Course> courses = courseService.getCoursesByRequestTeacherId(teacherId);
+        
+        // Convert to detailed course maps without lazy-loaded relationships
+        List<Map<String, Object>> responseList = courses.stream()
+            .map(course -> {
+                Map<String, Object> courseMap = new HashMap<>();
+                courseMap.put("id", course.getId());
+                courseMap.put("title", course.getTitle());
+                courseMap.put("description", course.getDescription());
+                courseMap.put("picture", course.getPicture());
+                courseMap.put("price", course.getPrice());
+                courseMap.put("isPublic", course.isPublic());
+                courseMap.put("tags", course.getTags());
+                
+                // Add teacher information
+                Map<String, Object> teacherMap = new HashMap<>();
+                teacherMap.put("id", course.getTeacher().getId());
+                teacherMap.put("fullName", course.getTeacher().getFullName());
+                courseMap.put("teacher", teacherMap);
+                
+                // Add course request information if available
+                if (course.getCourseRequest() != null) {
+                    Map<String, Object> requestMap = new HashMap<>();
+                    requestMap.put("id", course.getCourseRequest().getId());
+                    requestMap.put("subject", course.getCourseRequest().getSubject());
+                    requestMap.put("price", course.getCourseRequest().getPrice());
+                    requestMap.put("status", course.getCourseRequest().getStatus());
+                    
+                    // Add student information
+                    if (course.getCourseRequest().getStudent() != null) {
+                        Map<String, Object> studentMap = new HashMap<>();
+                        studentMap.put("id", course.getCourseRequest().getStudent().getId());
+                        studentMap.put("fullName", course.getCourseRequest().getStudent().getFullName());
+                        requestMap.put("student", studentMap);
+                    }
+                    
+                    // Add categories if available
+                    if (course.getCourseRequest().getCategories() != null) {
+                        List<Map<String, Object>> categoriesMap = course.getCourseRequest().getCategories().stream()
+                            .map(category -> {
+                                Map<String, Object> categoryMap = new HashMap<>();
+                                categoryMap.put("id", category.getId());
+                                categoryMap.put("title", category.getTitle());
+                                return categoryMap;
+                            })
+                            .collect(Collectors.toList());
+                        requestMap.put("categories", categoriesMap);
+                    }
+                    
+                    courseMap.put("courseRequest", requestMap);
+                }
+                
+                // Add chapters information if available
+                if (course.getChapters() != null) {
+                    List<Map<String, Object>> chaptersMap = course.getChapters().stream()
+                        .map(chapter -> {
+                            Map<String, Object> chapterMap = new HashMap<>();
+                            chapterMap.put("id", chapter.getId());
+                            chapterMap.put("title", chapter.getTitle());
+                            chapterMap.put("description", chapter.getDescription());
+                            chapterMap.put("type", chapter.getType());
+                            
+                            // Add content information if available
+                            if (chapter.getContents() != null) {
+                                List<Map<String, Object>> contentsMap = chapter.getContents().stream()
+                                    .map(content -> {
+                                        Map<String, Object> contentMap = new HashMap<>();
+                                        contentMap.put("id", content.getId());
+                                        contentMap.put("title", content.getTitle());
+                                        contentMap.put("type", content.getType());
+                                        contentMap.put("content", content.getContent());
+                                        return contentMap;
+                                    })
+                                    .collect(Collectors.toList());
+                                chapterMap.put("contents", contentsMap);
+                            }
+                            
+                            // Add quiz information if available
+                            if (chapter.getQuizzes() != null) {
+                                List<Map<String, Object>> quizzesMap = chapter.getQuizzes().stream()
+                                    .map(quiz -> {
+                                        Map<String, Object> quizMap = new HashMap<>();
+                                        quizMap.put("id", quiz.getQuizId());
+                                        quizMap.put("title", quiz.getTitle());
+                                        quizMap.put("description", quiz.getDescription());
+                                        quizMap.put("timeLimit", quiz.getTimeLimit());
+                                        quizMap.put("passingScore", quiz.getPassingScore());
+                                        quizMap.put("maxAttempts", quiz.getMaxAttempts());
+                                        quizMap.put("status", quiz.getStatus());
+                                        
+                                        // Include quiz questions if available
+                                        if (quiz.getQuestions() != null) {
+                                            List<Map<String, Object>> questionsMap = quiz.getQuestions().stream()
+                                                .map(question -> {
+                                                    Map<String, Object> questionMap = new HashMap<>();
+                                                    questionMap.put("id", question.getQuestionId());
+                                                    questionMap.put("questionText", question.getQuestionText());
+                                                    questionMap.put("questionType", question.getQuestionType());
+                                                    questionMap.put("options", question.getOptions());
+                                                    questionMap.put("correctAnswer", question.getCorrectAnswer());
+                                                    questionMap.put("correctAnswers", question.getCorrectAnswers());
+                                                    questionMap.put("points", question.getPoints());
+                                                    return questionMap;
+                                                })
+                                                .collect(Collectors.toList());
+                                            quizMap.put("questions", questionsMap);
+                                        }
+                                        
+                                        return quizMap;
+                                    })
+                                    .collect(Collectors.toList());
+                                chapterMap.put("quizzes", quizzesMap);
+                            }
+                            
+                            return chapterMap;
+                        })
+                        .collect(Collectors.toList());
+                    courseMap.put("chapters", chaptersMap);
+                }
+                
+                // Add categories if available
+                if (course.getCategories() != null) {
+                    List<Map<String, Object>> categoriesMap = course.getCategories().stream()
+                        .map(category -> {
+                            Map<String, Object> categoryMap = new HashMap<>();
+                            categoryMap.put("id", category.getId());
+                            categoryMap.put("title", category.getTitle());
+                            categoryMap.put("description", category.getDescription());
+                            return categoryMap;
+                        })
+                        .collect(Collectors.toList());
+                    courseMap.put("categories", categoriesMap);
+                }
+                
+                return courseMap;
+            })
+            .collect(Collectors.toList());
+            
+        return ResponseEntity.ok(responseList);
+    }
 }

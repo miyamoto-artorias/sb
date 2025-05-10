@@ -243,4 +243,102 @@ public class CourseService {
         
         return courses;
     }
+
+    /**
+     * Get courses created for requests handled by a specific teacher
+     * @param teacherId ID of the teacher who handled the requests
+     * @return List of courses created from requests assigned to this teacher
+     */
+    @Transactional(readOnly = true)
+    public List<Course> getCoursesByRequestTeacherId(int teacherId) {
+        // Verify teacher exists
+        teacherRepository.findById(teacherId)
+                .orElseThrow(() -> new EntityNotFoundException("Teacher with ID " + teacherId + " not found"));
+        
+        // Get courses where the course request is associated with this teacher
+        List<Course> courses = courseRepository.findByRequestTeacherId(teacherId);
+        
+        // Eagerly load necessary data to avoid lazy loading issues
+        courses.forEach(course -> {
+            // Make sure teacher is loaded
+            if (course.getTeacher() != null) {
+                course.getTeacher().getFullName(); // Access property to ensure it's loaded
+            }
+            
+            // Make sure course request is loaded
+            if (course.getCourseRequest() != null) {
+                course.getCourseRequest().getId(); // Access property to ensure it's loaded
+                course.getCourseRequest().getSubject(); // Access property to ensure it's loaded
+                
+                // Make sure student in course request is loaded
+                if (course.getCourseRequest().getStudent() != null) {
+                    course.getCourseRequest().getStudent().getId();
+                    course.getCourseRequest().getStudent().getFullName();
+                }
+                
+                // Make sure teacher in course request is loaded
+                if (course.getCourseRequest().getTeacher() != null) {
+                    course.getCourseRequest().getTeacher().getId();
+                }
+                
+                // Make sure categories in course request are loaded
+                if (course.getCourseRequest().getCategories() != null) {
+                    course.getCourseRequest().getCategories().forEach(category -> {
+                        category.getId();
+                        category.getTitle();
+                    });
+                }
+            }
+            
+            // Load chapters and their contents
+            if (course.getChapters() != null) {
+                course.getChapters().forEach(chapter -> {
+                    // Access chapter properties to ensure it's loaded
+                    chapter.getTitle();
+                    chapter.getDescription();
+                    
+                    // Load chapter contents
+                    if (chapter.getContents() != null) {
+                        chapter.getContents().forEach(content -> {
+                            // Access content properties to ensure it's loaded
+                            content.getTitle();
+                            content.getType();
+                            content.getContent();
+                        });
+                    }
+                    
+                    // Load quizzes and questions
+                    if (chapter.getQuizzes() != null) {
+                        chapter.getQuizzes().forEach(quiz -> {
+                            // Access quiz properties
+                            quiz.getTitle();
+                            quiz.getDescription();
+                            
+                            // Load quiz questions
+                            if (quiz.getQuestions() != null) {
+                                quiz.getQuestions().forEach(question -> {
+                                    // Access question properties
+                                    question.getQuestionText();
+                                    question.getQuestionType();
+                                    question.getOptions();
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+            
+            // Load categories
+            if (course.getCategories() != null) {
+                course.getCategories().size(); // Access size to trigger loading
+            }
+            
+            // Load tags
+            if (course.getTags() != null) {
+                course.getTags().size();
+            }
+        });
+        
+        return courses;
+    }
 }
