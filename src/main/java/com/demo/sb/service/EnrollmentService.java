@@ -6,6 +6,8 @@ import com.demo.sb.entity.User;
 import com.demo.sb.repository.CourseRepository;
 import com.demo.sb.repository.EnrollmentRepository;
 import com.demo.sb.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ public class EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository; // Assume this exists
     private final CourseRepository courseRepository; // Assume this exists
+    private static final Logger logger = LoggerFactory.getLogger(EnrollmentService.class);
 
     @Autowired
     public EnrollmentService(
@@ -30,12 +33,15 @@ public class EnrollmentService {
         this.courseRepository = courseRepository;
     }
 
-    @Transactional
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public Enrollment createEnrollment(Integer userId, Integer courseId) {
         try {
+            logger.info("Creating enrollment for user ID: {} in course ID: {}", userId, courseId);
+            
             // Check for existing enrollment first - if it exists, return it
             Optional<Enrollment> existingEnrollment = enrollmentRepository.findByUser_IdAndCourse_Id(userId, courseId);
             if (existingEnrollment.isPresent()) {
+                logger.info("User {} is already enrolled in course {}, returning existing enrollment", userId, courseId);
                 return existingEnrollment.get();
             }
 
@@ -50,8 +56,13 @@ public class EnrollmentService {
             enrollment.setProgress(0.0f);
             enrollment.setPoints(0);
 
-            return enrollmentRepository.save(enrollment);
+            Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
+            logger.info("Successfully created new enrollment with ID: {} for user {} in course {}", 
+                    savedEnrollment.getId(), userId, courseId);
+            
+            return savedEnrollment;
         } catch (Exception e) {
+            logger.error("Error creating enrollment for user {} in course {}: {}", userId, courseId, e.getMessage(), e);
             if (e instanceof RuntimeException) {
                 throw (RuntimeException) e;
             }
