@@ -136,14 +136,43 @@ public class CourseService {
      * @param userId ID of the user who made the requests
      * @return List of courses created from the user's requests
      */
+    @Transactional(readOnly = true)
     public List<Course> getCoursesFromCompletedRequests(int userId) {
         // Find all requests from this user with "done" status
         List<CourseRequest> completedRequests = courseRequestRepository.findByStudentIdAndStatus(userId, "done");
         
         // Extract the created courses from these requests
-        return completedRequests.stream()
+        List<Course> courses = completedRequests.stream()
                 .map(CourseRequest::getCreatedCourse)
                 .filter(course -> course != null) // Filter out any null courses
                 .collect(Collectors.toList());
+        
+        // Eagerly load chapters and content for each course to avoid lazy loading issues
+        courses.forEach(course -> {
+            if (course.getChapters() != null) {
+                course.getChapters().forEach(chapter -> {
+                    if (chapter.getContents() != null) {
+                        // Access contents to load them into memory
+                        chapter.getContents().size();
+                    }
+                    
+                    // Eager load quizzes and their questions
+                    if (chapter.getQuizzes() != null) {
+                        chapter.getQuizzes().forEach(quiz -> {
+                            if (quiz.getQuestions() != null) {
+                                // Access questions to load them into memory
+                                quiz.getQuestions().size();
+                            }
+                        });
+                    }
+                });
+            }
+            if (course.getCategories() != null) {
+                // Access categories to load them into memory
+                course.getCategories().size();
+            }
+        });
+        
+        return courses;
     }
 }
