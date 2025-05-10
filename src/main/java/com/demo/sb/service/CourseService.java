@@ -33,12 +33,42 @@ public class CourseService {
         return courseRepository.save(course);
     }
 
+    /**
+     * Get courses by teacher ID
+     * @param teacherId ID of the teacher
+     * @return List of courses taught by this teacher
+     */
+    @Transactional(readOnly = true)
     public List<Course> getCoursesByTeacher(int teacherId) {
-        // Optional: Verify teacher exists (not strictly necessary since an empty list is fine)
+        // First verify teacher exists
         teacherRepository.findById(teacherId)
                 .orElseThrow(() -> new EntityNotFoundException("Teacher with ID " + teacherId + " not found"));
-        return courseRepository.findByTeacherId(teacherId);
-    }    @Transactional
+        
+        // Get courses by teacher ID
+        List<Course> courses = courseRepository.findByTeacherId(teacherId);
+        
+        // Eagerly load necessary data to avoid lazy loading issues
+        courses.forEach(course -> {
+            // Make sure teacher is loaded
+            if (course.getTeacher() != null) {
+                course.getTeacher().getFullName(); // Access property to ensure it's loaded
+            }
+            
+            // Load categories
+            if (course.getCategories() != null) {
+                course.getCategories().size(); // Access size to trigger loading
+            }
+            
+            // Load tags
+            if (course.getTags() != null) {
+                course.getTags().size();
+            }
+        });
+        
+        return courses;
+    }
+
+    @Transactional
     public Course createCourseForRequest(int courseRequestId, int teacherId, CourseDTO courseDto) {
         // Validate and retrieve the course request
         CourseRequest courseRequest = courseRequestRepository.findById(courseRequestId)

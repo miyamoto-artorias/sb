@@ -98,9 +98,46 @@ public class CourseController {
     }
 
     @GetMapping("/teacher/{teacherId}")
-    public ResponseEntity<List<Course>> getCoursesByTeacher(@PathVariable int teacherId) {
+    public ResponseEntity<List<Map<String, Object>>> getCoursesByTeacher(@PathVariable int teacherId) {
         List<Course> courses = courseService.getCoursesByTeacher(teacherId);
-        return ResponseEntity.ok(courses);
+        
+        // Convert to detailed course maps without lazy-loaded relationships
+        List<Map<String, Object>> responseList = courses.stream()
+            .map(course -> {
+                Map<String, Object> courseMap = new HashMap<>();
+                courseMap.put("id", course.getId());
+                courseMap.put("title", course.getTitle());
+                courseMap.put("description", course.getDescription());
+                courseMap.put("picture", course.getPicture());
+                courseMap.put("price", course.getPrice());
+                courseMap.put("isPublic", course.isPublic());
+                courseMap.put("tags", course.getTags());
+                
+                // Add teacher information
+                Map<String, Object> teacherMap = new HashMap<>();
+                teacherMap.put("id", course.getTeacher().getId());
+                teacherMap.put("fullName", course.getTeacher().getFullName());
+                courseMap.put("teacher", teacherMap);
+                
+                // Add categories if available
+                if (course.getCategories() != null) {
+                    List<Map<String, Object>> categoriesMap = course.getCategories().stream()
+                        .map(category -> {
+                            Map<String, Object> categoryMap = new HashMap<>();
+                            categoryMap.put("id", category.getId());
+                            categoryMap.put("title", category.getTitle());
+                            categoryMap.put("description", category.getDescription());
+                            return categoryMap;
+                        })
+                        .collect(Collectors.toList());
+                    courseMap.put("categories", categoriesMap);
+                }
+                
+                return courseMap;
+            })
+            .collect(Collectors.toList());
+            
+        return ResponseEntity.ok(responseList);
     }
     
     @GetMapping
