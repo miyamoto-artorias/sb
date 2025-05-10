@@ -129,4 +129,39 @@ public class CourseController {
                     .body(Map.of("error", ex.getMessage()));
         }
     }
+      /**
+     * Get all courses created from a user's "done" requests
+     * These are the private courses created specifically for a user
+     */
+    @GetMapping("/user-requests/{userId}")
+    public ResponseEntity<?> getCoursesFromUserRequests(@PathVariable int userId) {
+        try {
+            List<Course> courses = courseService.getCoursesFromCompletedRequests(userId);
+            
+            // Convert to DTOs to avoid serialization issues with lazy-loaded associations
+            List<Map<String, Object>> responseCourses = courses.stream()
+                .map(course -> {
+                    Map<String, Object> courseMap = new HashMap<>();
+                    courseMap.put("id", course.getId());
+                    courseMap.put("title", course.getTitle());
+                    courseMap.put("description", course.getDescription());
+                    courseMap.put("picture", course.getPicture());
+                    courseMap.put("price", course.getPrice());
+                    courseMap.put("isPublic", course.isPublic());
+                      // Add teacher information
+                    Map<String, Object> teacherMap = new HashMap<>();
+                    teacherMap.put("id", course.getTeacher().getId());
+                    teacherMap.put("fullName", course.getTeacher().getFullName());
+                    courseMap.put("teacher", teacherMap);
+                    
+                    return courseMap;
+                })
+                .collect(Collectors.toList());
+                
+            return ResponseEntity.ok(responseCourses);
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", ex.getMessage()));
+        }
+    }
 }

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CourseService {
@@ -95,5 +96,21 @@ public class CourseService {
         
         // Use PostgreSQL full-text search for complex queries with multiple keywords
         return courseRepository.fullTextSearch(searchTerm.trim());
+    }
+
+    /**
+     * Get courses that were created from a user's requests with "done" status
+     * @param userId ID of the user who made the requests
+     * @return List of courses created from the user's requests
+     */
+    public List<Course> getCoursesFromCompletedRequests(int userId) {
+        // Find all requests from this user with "done" status
+        List<CourseRequest> completedRequests = courseRequestRepository.findByStudentIdAndStatus(userId, "done");
+        
+        // Extract the created courses from these requests
+        return completedRequests.stream()
+                .map(CourseRequest::getCreatedCourse)
+                .filter(course -> course != null) // Filter out any null courses
+                .collect(Collectors.toList());
     }
 }
