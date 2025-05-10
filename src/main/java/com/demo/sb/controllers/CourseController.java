@@ -119,6 +119,74 @@ public class CourseController {
                 teacherMap.put("fullName", course.getTeacher().getFullName());
                 courseMap.put("teacher", teacherMap);
                 
+                // Add chapters information if available
+                if (course.getChapters() != null) {
+                    List<Map<String, Object>> chaptersMap = course.getChapters().stream()
+                        .map(chapter -> {
+                            Map<String, Object> chapterMap = new HashMap<>();
+                            chapterMap.put("id", chapter.getId());
+                            chapterMap.put("title", chapter.getTitle());
+                            chapterMap.put("description", chapter.getDescription());
+                            chapterMap.put("type", chapter.getType());
+                            
+                            // Add content information if available
+                            if (chapter.getContents() != null) {
+                                List<Map<String, Object>> contentsMap = chapter.getContents().stream()
+                                    .map(content -> {
+                                        Map<String, Object> contentMap = new HashMap<>();
+                                        contentMap.put("id", content.getId());
+                                        contentMap.put("title", content.getTitle());
+                                        contentMap.put("type", content.getType());
+                                        contentMap.put("content", content.getContent());
+                                        return contentMap;
+                                    })
+                                    .collect(Collectors.toList());
+                                chapterMap.put("contents", contentsMap);
+                            }
+                            
+                            // Add quiz information if available
+                            if (chapter.getQuizzes() != null) {
+                                List<Map<String, Object>> quizzesMap = chapter.getQuizzes().stream()
+                                    .map(quiz -> {
+                                        Map<String, Object> quizMap = new HashMap<>();
+                                        quizMap.put("id", quiz.getQuizId());
+                                        quizMap.put("title", quiz.getTitle());
+                                        quizMap.put("description", quiz.getDescription());
+                                        quizMap.put("timeLimit", quiz.getTimeLimit());
+                                        quizMap.put("passingScore", quiz.getPassingScore());
+                                        quizMap.put("maxAttempts", quiz.getMaxAttempts());
+                                        quizMap.put("status", quiz.getStatus());
+                                        
+                                        // Include quiz questions if available
+                                        if (quiz.getQuestions() != null) {
+                                            List<Map<String, Object>> questionsMap = quiz.getQuestions().stream()
+                                                .map(question -> {
+                                                    Map<String, Object> questionMap = new HashMap<>();
+                                                    questionMap.put("id", question.getQuestionId());
+                                                    questionMap.put("questionText", question.getQuestionText());
+                                                    questionMap.put("questionType", question.getQuestionType());
+                                                    questionMap.put("options", question.getOptions());
+                                                    questionMap.put("correctAnswer", question.getCorrectAnswer());
+                                                    questionMap.put("correctAnswers", question.getCorrectAnswers());
+                                                    questionMap.put("points", question.getPoints());
+                                                    return questionMap;
+                                                })
+                                                .collect(Collectors.toList());
+                                            quizMap.put("questions", questionsMap);
+                                        }
+                                        
+                                        return quizMap;
+                                    })
+                                    .collect(Collectors.toList());
+                                chapterMap.put("quizzes", quizzesMap);
+                            }
+                            
+                            return chapterMap;
+                        })
+                        .collect(Collectors.toList());
+                    courseMap.put("chapters", chaptersMap);
+                }
+                
                 // Add categories if available
                 if (course.getCategories() != null) {
                     List<Map<String, Object>> categoriesMap = course.getCategories().stream()

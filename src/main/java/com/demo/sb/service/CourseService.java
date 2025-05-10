@@ -54,6 +54,44 @@ public class CourseService {
                 course.getTeacher().getFullName(); // Access property to ensure it's loaded
             }
             
+            // Load chapters and their contents
+            if (course.getChapters() != null) {
+                course.getChapters().forEach(chapter -> {
+                    // Access chapter properties to ensure it's loaded
+                    chapter.getTitle();
+                    chapter.getDescription();
+                    
+                    // Load chapter contents
+                    if (chapter.getContents() != null) {
+                        chapter.getContents().forEach(content -> {
+                            // Access content properties to ensure it's loaded
+                            content.getTitle();
+                            content.getType();
+                            content.getContent();
+                        });
+                    }
+                    
+                    // Load quizzes and questions
+                    if (chapter.getQuizzes() != null) {
+                        chapter.getQuizzes().forEach(quiz -> {
+                            // Access quiz properties
+                            quiz.getTitle();
+                            quiz.getDescription();
+                            
+                            // Load quiz questions
+                            if (quiz.getQuestions() != null) {
+                                quiz.getQuestions().forEach(question -> {
+                                    // Access question properties
+                                    question.getQuestionText();
+                                    question.getQuestionType();
+                                    question.getOptions();
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+            
             // Load categories
             if (course.getCategories() != null) {
                 course.getCategories().size(); // Access size to trigger loading
