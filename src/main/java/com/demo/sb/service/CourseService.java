@@ -78,24 +78,57 @@ public class CourseService {
         courseRequestRepository.save(courseRequest);
 
         return savedCourse;
-    }
-
-    public Course getCourseById(int id) {
-        return courseRepository.findById(id)
+    }    public Course getCourseById(int id) {
+        Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Course not found with ID: " + id));
-    }
-
-    public List<Course> getAllCourses() {
-        return courseRepository.findAll();
+                
+        return course;
     }
     
-    public List<Course> searchCourses(String searchTerm) {
+    /**
+     * Get a course by ID, with authorization check
+     * @param courseId The ID of the course to retrieve
+     * @param userId The ID of the user trying to access the course
+     * @return The course if the user is authorized to see it
+     * @throws SecurityException if the user is not authorized to see this course
+     */
+    public Course getCourseByIdWithAuth(int courseId, int userId) {
+        Course course = getCourseById(courseId);
+        
+        // If the course is public, anyone can see it
+        if (course.isPublic()) {
+            return course;
+        }
+        
+        // If not public, check if user is the teacher of the course
+        if (course.getTeacher().getId() == userId) {
+            return course;
+        }
+        
+        // If not public and user is not the teacher, check if user is the requester
+        if (course.getCourseRequest() != null && 
+            course.getCourseRequest().getStudent() != null &&
+            course.getCourseRequest().getStudent().getId() == userId) {
+            return course;
+        }
+        
+        // If none of the above, user is not authorized to see this course
+        throw new SecurityException("You are not authorized to access this course");
+    }public List<Course> getAllCourses() {
+        // Only return public courses by default
+        return courseRepository.findByIsPublicTrue();
+    }
+      public List<Course> searchCourses(String searchTerm) {
         if (searchTerm == null || searchTerm.trim().isEmpty()) {
-            return getAllCourses();
+            return getAllCourses(); // This already filters for public courses
         }
         
         // Use PostgreSQL full-text search for complex queries with multiple keywords
-        return courseRepository.fullTextSearch(searchTerm.trim());
+        // Then filter to include only public courses
+        return courseRepository.fullTextSearch(searchTerm.trim())
+                .stream()
+                .filter(Course::isPublic)
+                .collect(Collectors.toList());
     }
 
     /**

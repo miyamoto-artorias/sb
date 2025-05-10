@@ -43,15 +43,56 @@ public class CourseController {
 
         Course createdCourse = courseService.createCourse(course, teacherId);
         return ResponseEntity.ok(createdCourse);
-    }
-
-    @GetMapping("/{id}")
+    }    @GetMapping("/{id}")
     public ResponseEntity<?> getCourseById(@PathVariable int id) {
         try {
             Course course = courseService.getCourseById(id);
+            
+            // If the course is not public, we need to check if it should be visible in a separate endpoint
+            // that includes user authentication
+            if (!course.isPublic()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "This course is private. Use authenticated endpoints to access it."));
+            }
+            
             return ResponseEntity.ok(course);
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", ex.getMessage()));
+        }
+    }
+    
+    /**
+     * Get a course by ID with authentication
+     * This endpoint should be called with authentication and will check if the user has access
+     * to the requested course (either public, or private but user is teacher/requester)
+     */
+    @GetMapping("/authenticated/{courseId}/user/{userId}")
+    public ResponseEntity<?> getAuthenticatedCourseById(@PathVariable int courseId, @PathVariable int userId) {
+        try {
+            Course course = courseService.getCourseByIdWithAuth(courseId, userId);
+            
+            // Convert to a DTO to avoid serialization issues
+            Map<String, Object> courseMap = new HashMap<>();
+            courseMap.put("id", course.getId());
+            courseMap.put("title", course.getTitle());
+            courseMap.put("description", course.getDescription());
+            courseMap.put("picture", course.getPicture());
+            courseMap.put("price", course.getPrice());
+            courseMap.put("isPublic", course.isPublic());
+            
+            // Add teacher information
+            Map<String, Object> teacherMap = new HashMap<>();
+            teacherMap.put("id", course.getTeacher().getId());
+            teacherMap.put("fullName", course.getTeacher().getFullName());
+            courseMap.put("teacher", teacherMap);
+            
+            return ResponseEntity.ok(courseMap);
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", ex.getMessage()));
+        } catch (SecurityException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", ex.getMessage()));
         }
     }
