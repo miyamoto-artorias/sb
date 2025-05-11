@@ -4,10 +4,12 @@ import com.demo.sb.dto.CourseRequestDTO;
 import com.demo.sb.service.CourseRequestService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/course-requests")
@@ -60,6 +62,29 @@ public class CourseRequestController {
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+    
+    /**
+     * Update the status of a course request
+     * @param id The ID of the course request to update
+     * @param requestBody Map containing the new status value
+     * @return ResponseEntity with success or error message
+     */
+    @PutMapping("/{id}/status")
+    public ResponseEntity<?> updateRequestStatus(@PathVariable int id, @RequestBody Map<String, String> requestBody) {
+        try {
+            String status = requestBody.get("status");
+            if (status == null || status.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Status cannot be empty"));
+            }
+            
+            courseRequestService.updateRequestStatus(id, status);
+            return ResponseEntity.ok(Map.of("message", "Course request status updated successfully"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Course request not found"));
         }
     }
 }

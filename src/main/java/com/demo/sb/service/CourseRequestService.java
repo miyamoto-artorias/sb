@@ -88,6 +88,38 @@ public class CourseRequestService {
         }
     }
     
+    /**
+     * Update the status of a course request to any valid value
+     * @param id The ID of the course request to update
+     * @param status The new status value
+     * @throws EntityNotFoundException if the course request is not found
+     * @throws IllegalArgumentException if the status is invalid
+     */
+    @Transactional
+    public void updateRequestStatus(int id, String status) {
+        // Validate the status
+        if (status == null || status.isEmpty()) {
+            throw new IllegalArgumentException("Status cannot be empty");
+        }
+        
+        // Check if the status is valid (add your valid statuses here)
+        List<String> validStatuses = List.of("pending", "accepted", "rejected", "done", "cancelled");
+        if (!validStatuses.contains(status.toLowerCase())) {
+            throw new IllegalArgumentException("Invalid status. Valid values are: " + String.join(", ", validStatuses));
+        }
+        
+        // Find the course request
+        Optional<CourseRequest> requestOpt = courseRequestRepository.findById(id);
+        if (requestOpt.isEmpty()) {
+            throw new EntityNotFoundException("Course request not found with ID: " + id);
+        }
+        
+        // Update the status
+        CourseRequest request = requestOpt.get();
+        request.setStatus(status.toLowerCase());
+        courseRequestRepository.save(request);
+    }
+    
     // Helper methods for DTO conversion
     private CourseRequest convertToEntity(CourseRequestDTO dto) {
         CourseRequest entity = new CourseRequest();
