@@ -282,7 +282,7 @@ public class CourseController {
     @GetMapping("/user-requests/{userId}")
     public ResponseEntity<?> getCoursesFromUserRequests(@PathVariable int userId) {
         try {
-            List<Course> courses = courseService.getCoursesFromCompletedRequests(userId);
+            List<Course> courses = courseService.getCoursesFromDoneRequests(userId);
             
             // Convert to detailed course maps with chapters and content
             List<Map<String, Object>> responseCourses = courses.stream()
