@@ -126,4 +126,24 @@ public class ProgressController {
                     .body(Map.of("error", e.getMessage()));
         }
     }
+    
+    /**
+     * Get completion status for a specific content item
+     */
+    @GetMapping("/user/{userId}/content/{contentId}/enrollment/{enrollmentId}/status")
+    public ResponseEntity<?> getContentCompletionStatus(
+            @PathVariable int userId,
+            @PathVariable int contentId,
+            @PathVariable int enrollmentId) {
+        try {
+            Map<String, Object> status = progressService.getContentCompletionStatus(userId, contentId, enrollmentId);
+            return ResponseEntity.ok(status);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
 } 

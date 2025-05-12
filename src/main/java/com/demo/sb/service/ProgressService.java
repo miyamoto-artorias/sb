@@ -151,4 +151,40 @@ public class ProgressService {
         
         enrollmentRepository.saveAll(enrollments);
     }
+    
+    /**
+     * Check if a specific content is completed for a user's enrollment
+     * @param userId The user ID
+     * @param contentId The content ID
+     * @param enrollmentId The enrollment ID
+     * @return A map containing the completion status
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Object> getContentCompletionStatus(int userId, int contentId, int enrollmentId) {
+        // Get the entities from the database
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+        
+        CourseContent content = contentRepository.findById(contentId)
+                .orElseThrow(() -> new EntityNotFoundException("Content not found with ID: " + contentId));
+        
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new EntityNotFoundException("Enrollment not found with ID: " + enrollmentId));
+        
+        // Find if progress entry exists
+        Optional<UserContentProgress> progressOpt = progressRepository.findByUserAndContentAndEnrollment(
+                user, content, enrollment);
+        
+        boolean isCompleted = progressOpt.isPresent() && progressOpt.get().isCompleted();
+        
+        // Return the completion status
+        return Map.of(
+            "userId", userId,
+            "contentId", contentId,
+            "enrollmentId", enrollmentId,
+            "completed", isCompleted,
+            "completedDate", progressOpt.isPresent() && progressOpt.get().getCompletedDate() != null ? 
+                progressOpt.get().getCompletedDate().toString() : null
+        );
+    }
 } 
