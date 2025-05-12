@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface CourseChapterRepository extends JpaRepository<CourseChapter, Integer> {
 
-    List<CourseChapter> findByCourseId(int courseId);
+    List<CourseChapter> findByCourse_Id(int courseId);
 
 }

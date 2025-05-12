@@ -6,6 +6,7 @@ import com.demo.sb.entity.Course;
 import com.demo.sb.entity.CourseChapter;
 import com.demo.sb.repository.CourseChapterRepository;
 import com.demo.sb.repository.CourseRepository; // Assume this exists
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,7 +48,12 @@ public class CourseChapterService {
 
     // Get all chapters for a course
     public List<CourseChapter> getChaptersByCourseId(int courseId) {
-        return chapterRepository.findByCourseId(courseId);
+        // Check if course exists
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new EntityNotFoundException("Course not found with ID: " + courseId));
+                
+        // Fetch chapters
+        return chapterRepository.findByCourse_Id(courseId);
     }
 
     // Update chapter
