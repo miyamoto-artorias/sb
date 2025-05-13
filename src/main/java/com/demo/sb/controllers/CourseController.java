@@ -52,8 +52,8 @@ public class CourseController {
             @Parameter(description = "Description of the course") @RequestPart("description") String description,
             @Parameter(description = "Image file for the course") @RequestPart(value = "pictureFile", required = false) MultipartFile pictureFile,
             @Parameter(description = "Price of the course") @RequestPart("price") String priceStr,
-            @Parameter(description = "IDs of course categories") @RequestPart(value = "categoryIds", required = false) List<String> categoryIdStrings,
-            @Parameter(description = "Tags for the course") @RequestPart(value = "tags", required = false) List<String> tags,
+            @Parameter(description = "IDs of course categories") @RequestParam(value = "categoryIds", required = false) List<Integer> categoryIds,
+            @Parameter(description = "Tags for the course") @RequestParam(value = "tags", required = false) List<String> tags,
             @Parameter(description = "ID of the teacher") @PathVariable int teacherId) {
         
         try {
@@ -72,20 +72,14 @@ public class CourseController {
             float price = Float.parseFloat(priceStr);
             course.setPrice(price);
             
-            // Parse and set category IDs
-            List<Integer> categoryIds = new ArrayList<>();
-            if (categoryIdStrings != null) {
-                categoryIds = categoryIdStrings.stream()
-                    .map(Integer::parseInt)
-                    .collect(Collectors.toList());
-            }
-            
             // Map category IDs to actual Category entities
-            List<Category> categories = categoryRepository.findAllById(categoryIds);
+            List<Category> categories = categoryIds != null ? 
+                categoryRepository.findAllById(categoryIds) : 
+                new ArrayList<>();
             course.setCategories(categories);
             
             // Set tags
-            course.setTags(tags);
+            course.setTags(tags != null ? tags : new ArrayList<>());
             
             Course createdCourse = courseService.createCourse(course, teacherId);
             return ResponseEntity.ok(createdCourse);
@@ -137,8 +131,8 @@ public class CourseController {
             @Parameter(description = "Description of the course") @RequestPart("description") String description,
             @Parameter(description = "Image file for the course") @RequestPart(value = "pictureFile", required = false) MultipartFile pictureFile,
             @Parameter(description = "Price of the course") @RequestPart("price") String priceStr,
-            @Parameter(description = "IDs of course categories") @RequestPart(value = "categoryIds", required = false) List<String> categoryIdStrings,
-            @Parameter(description = "Tags for the course") @RequestPart(value = "tags", required = false) List<String> tags) {
+            @Parameter(description = "IDs of course categories") @RequestParam(value = "categoryIds", required = false) List<Integer> categoryIds,
+            @Parameter(description = "Tags for the course") @RequestParam(value = "tags", required = false) List<String> tags) {
         
         try {
             CourseDTO courseDto = new CourseDTO();
@@ -156,17 +150,11 @@ public class CourseController {
             float price = Float.parseFloat(priceStr);
             courseDto.setPrice(price);
             
-            // Parse and set category IDs
-            List<Integer> categoryIds = new ArrayList<>();
-            if (categoryIdStrings != null) {
-                categoryIds = categoryIdStrings.stream()
-                    .map(Integer::parseInt)
-                    .collect(Collectors.toList());
-            }
-            courseDto.setCategoryIds(categoryIds);
+            // Set category IDs directly
+            courseDto.setCategoryIds(categoryIds != null ? categoryIds : new ArrayList<>());
             
             // Set tags
-            courseDto.setTags(tags);
+            courseDto.setTags(tags != null ? tags : new ArrayList<>());
             
             Course course = courseService.createCourseForRequest(courseRequestId, teacherId, courseDto);
             

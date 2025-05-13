@@ -14,12 +14,12 @@ This Spring Boot application has been updated to support image uploads for cours
 - `description` (required): Course description
 - `pictureFile` (optional): Image file for the course
 - `price` (required): Course price
-- `categoryIds` (optional): Array of category IDs
-- `tags` (optional): Array of tags
+- `categoryIds` (optional): Array of category IDs (repeat parameter for multiple values)
+- `tags` (optional): Array of tags (repeat parameter for multiple values)
 
 **Example Request using curl:**
 ```bash
-curl -X POST http://localhost:8080/api/courses/1 \
+curl -X POST http://localhost:8081/api/courses/1 \
   -H "Content-Type: multipart/form-data" \
   -F "title=My Course" \
   -F "description=Course Description" \
@@ -41,8 +41,8 @@ curl -X POST http://localhost:8080/api/courses/1 \
 - `description` (required): Course description
 - `pictureFile` (optional): Image file for the course
 - `price` (required): Course price
-- `categoryIds` (optional): Array of category IDs
-- `tags` (optional): Array of tags
+- `categoryIds` (optional): Array of category IDs (repeat parameter for multiple values)
+- `tags` (optional): Array of tags (repeat parameter for multiple values)
 
 ## JSON Endpoints (Backward Compatibility)
 
@@ -61,10 +61,13 @@ The application includes Swagger UI for API documentation and testing:
    - Click "Try it out"
    - Fill in the required fields (title, description, price)
    - For pictureFile, click "Browse" to select an image file
-   - For categoryIds and tags, you can enter multiple values
+   - For categoryIds and tags arrays:
+     - Enter a value and press Enter to add each array item
+     - Swagger will automatically create repeated parameters for each array item
+     - This ensures they are sent correctly as form parameters
    - Execute the request
 
-**Important Note**: When using Swagger UI for file uploads, make sure the Content-Type is set to `multipart/form-data` in the request. Swagger UI should handle this automatically for properly documented endpoints.
+**Important Note for Arrays**: When using arrays with multipart/form-data, each array item needs to be a separate form field with the same name. In Swagger UI, you should add multiple values by adding them one by one to the form field.
 
 ## File Storage
 
