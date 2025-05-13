@@ -34,6 +34,22 @@ public class CourseService {
     }
 
     /**
+     * Update the public status of a course
+     * @param courseId ID of the course to update
+     * @param isPublic New public status
+     * @return The updated course
+     * @throws EntityNotFoundException if the course doesn't exist
+     */
+    @Transactional
+    public Course updateCoursePublicStatus(int courseId, boolean isPublic) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new EntityNotFoundException("Course not found with ID: " + courseId));
+        
+        course.setPublic(isPublic);
+        return courseRepository.save(course);
+    }
+
+    /**
      * Get courses by teacher ID
      * @param teacherId ID of the teacher
      * @return List of courses taught by this teacher

@@ -60,6 +60,7 @@ public class CourseController {
             Course course = new Course();
             course.setTitle(title);
             course.setDescription(description);
+            course.setPublic(false); // Set isPublic to false by default
             
             // Process file upload if provided
             if (pictureFile != null && !pictureFile.isEmpty()) {
@@ -110,6 +111,7 @@ public class CourseController {
         course.setPicture(courseDto.getPicture());
         course.setPrice(courseDto.getPrice());
         course.setTags(courseDto.getTags());
+        course.setPublic(false); // Set isPublic to false by default
 
         // Map category IDs to actual Category entities
         List<Category> categories = categoryRepository.findAllById(courseDto.getCategoryIds());
@@ -117,6 +119,37 @@ public class CourseController {
 
         Course createdCourse = courseService.createCourse(course, teacherId);
         return ResponseEntity.ok(createdCourse);
+    }
+    
+    @Operation(
+        summary = "Update course public status",
+        description = "Updates whether a course is public or private"
+    )
+    @PutMapping("/{courseId}/public")
+    public ResponseEntity<?> updateCoursePublicStatus(
+            @Parameter(description = "ID of the course") @PathVariable int courseId,
+            @Parameter(description = "Whether the course should be public") @RequestBody Map<String, Boolean> requestBody) {
+        try {
+            Boolean isPublic = requestBody.get("isPublic");
+            if (isPublic == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Missing 'isPublic' field in request body"));
+            }
+            
+            Course updatedCourse = courseService.updateCoursePublicStatus(courseId, isPublic);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", updatedCourse.getId());
+            response.put("isPublic", updatedCourse.isPublic());
+            response.put("message", "Course public status updated successfully");
+            
+            return ResponseEntity.ok(response);
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", ex.getMessage()));
+        }
     }
     
     @Operation(
