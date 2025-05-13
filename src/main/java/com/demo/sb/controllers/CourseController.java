@@ -6,12 +6,21 @@ import com.demo.sb.entity.Category;
 import com.demo.sb.entity.Course;
 import com.demo.sb.repository.CategoryRepository;
 import com.demo.sb.service.CourseService;
+import com.demo.sb.service.FileStorageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,10 +35,81 @@ public class CourseController {
 
     @Autowired
     private CategoryRepository categoryRepository;
+    
+    @Autowired
+    private FileStorageService fileStorageService;
+    
+    @Value("${file.upload-dir:uploads}")
+    private String uploadDir;
 
-
-    @PostMapping("/{teacherId}")
-    public ResponseEntity<Course> createCourse(@RequestBody CourseDTO courseDto, @PathVariable int teacherId) {
+    @Operation(
+        summary = "Create a new course with image upload",
+        description = "Creates a new course with optional image upload using multipart form data"
+    )
+    @PostMapping(value = "/{teacherId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> createCourse(
+            @Parameter(description = "Title of the course") @RequestPart("title") String title,
+            @Parameter(description = "Description of the course") @RequestPart("description") String description,
+            @Parameter(description = "Image file for the course") @RequestPart(value = "pictureFile", required = false) MultipartFile pictureFile,
+            @Parameter(description = "Price of the course") @RequestPart("price") String priceStr,
+            @Parameter(description = "IDs of course categories") @RequestPart(value = "categoryIds", required = false) List<String> categoryIdStrings,
+            @Parameter(description = "Tags for the course") @RequestPart(value = "tags", required = false) List<String> tags,
+            @Parameter(description = "ID of the teacher") @PathVariable int teacherId) {
+        
+        try {
+            Course course = new Course();
+            course.setTitle(title);
+            course.setDescription(description);
+            
+            // Process file upload if provided
+            if (pictureFile != null && !pictureFile.isEmpty()) {
+                String fileName = fileStorageService.storeFile(pictureFile);
+                String fileUrl = "/uploads/" + fileName;
+                course.setPicture(fileUrl);
+            }
+            
+            // Parse and set the price
+            float price = Float.parseFloat(priceStr);
+            course.setPrice(price);
+            
+            // Parse and set category IDs
+            List<Integer> categoryIds = new ArrayList<>();
+            if (categoryIdStrings != null) {
+                categoryIds = categoryIdStrings.stream()
+                    .map(Integer::parseInt)
+                    .collect(Collectors.toList());
+            }
+            
+            // Map category IDs to actual Category entities
+            List<Category> categories = categoryRepository.findAllById(categoryIds);
+            course.setCategories(categories);
+            
+            // Set tags
+            course.setTags(tags);
+            
+            Course createdCourse = courseService.createCourse(course, teacherId);
+            return ResponseEntity.ok(createdCourse);
+        } catch (IOException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to upload file: " + ex.getMessage()));
+        } catch (NumberFormatException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Invalid number format: " + ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", ex.getMessage()));
+        }
+    }
+    
+    // JSON-based version of create course (for backward compatibility)
+    @Operation(
+        summary = "Create a new course with JSON data",
+        description = "Creates a new course using JSON data (without file upload)"
+    )
+    @PostMapping(value = "/{teacherId}/json", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Course> createCourseJson(
+            @Parameter(description = "Course data") @RequestBody CourseDTO courseDto, 
+            @Parameter(description = "ID of the teacher") @PathVariable int teacherId) {
         Course course = new Course();
         course.setTitle(courseDto.getTitle());
         course.setDescription(courseDto.getDescription());
@@ -43,7 +123,112 @@ public class CourseController {
 
         Course createdCourse = courseService.createCourse(course, teacherId);
         return ResponseEntity.ok(createdCourse);
-    }    @GetMapping("/{id}")
+    }
+    
+    @Operation(
+        summary = "Create a course for a request with image upload",
+        description = "Creates a course for a specific request with optional image upload using multipart form data"
+    )
+    @PostMapping(value = "/request/{courseRequestId}/teacher/{teacherId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> createCourseForRequest(
+            @Parameter(description = "ID of the course request") @PathVariable int courseRequestId,
+            @Parameter(description = "ID of the teacher") @PathVariable int teacherId,
+            @Parameter(description = "Title of the course") @RequestPart("title") String title,
+            @Parameter(description = "Description of the course") @RequestPart("description") String description,
+            @Parameter(description = "Image file for the course") @RequestPart(value = "pictureFile", required = false) MultipartFile pictureFile,
+            @Parameter(description = "Price of the course") @RequestPart("price") String priceStr,
+            @Parameter(description = "IDs of course categories") @RequestPart(value = "categoryIds", required = false) List<String> categoryIdStrings,
+            @Parameter(description = "Tags for the course") @RequestPart(value = "tags", required = false) List<String> tags) {
+        
+        try {
+            CourseDTO courseDto = new CourseDTO();
+            courseDto.setTitle(title);
+            courseDto.setDescription(description);
+            
+            // Process file upload if provided
+            if (pictureFile != null && !pictureFile.isEmpty()) {
+                String fileName = fileStorageService.storeFile(pictureFile);
+                String fileUrl = "/uploads/" + fileName;
+                courseDto.setPicture(fileUrl);
+            }
+            
+            // Parse and set the price
+            float price = Float.parseFloat(priceStr);
+            courseDto.setPrice(price);
+            
+            // Parse and set category IDs
+            List<Integer> categoryIds = new ArrayList<>();
+            if (categoryIdStrings != null) {
+                categoryIds = categoryIdStrings.stream()
+                    .map(Integer::parseInt)
+                    .collect(Collectors.toList());
+            }
+            courseDto.setCategoryIds(categoryIds);
+            
+            // Set tags
+            courseDto.setTags(tags);
+            
+            Course course = courseService.createCourseForRequest(courseRequestId, teacherId, courseDto);
+            
+            // Return response
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", course.getId());
+            response.put("title", course.getTitle());
+            response.put("description", course.getDescription());
+            response.put("picture", course.getPicture());
+            response.put("price", course.getPrice());
+            response.put("isPublic", course.isPublic());
+            response.put("message", "Course successfully created for request");
+            
+            return ResponseEntity.ok(response);
+        } catch (IOException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to upload file: " + ex.getMessage()));
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", ex.getMessage()));
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", ex.getMessage()));
+        } catch (NumberFormatException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Invalid number format: " + ex.getMessage()));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", ex.getMessage()));
+        }
+    }
+    
+    // JSON-based version for backward compatibility
+    @PostMapping(value = "/request/{courseRequestId}/teacher/{teacherId}/json", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> createCourseForRequestJson(
+            @PathVariable int courseRequestId,
+            @PathVariable int teacherId,
+            @RequestBody CourseDTO courseDto) {
+        try {
+            Course course = courseService.createCourseForRequest(courseRequestId, teacherId, courseDto);
+            
+            // Return response
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", course.getId());
+            response.put("title", course.getTitle());
+            response.put("description", course.getDescription());
+            response.put("picture", course.getPicture());
+            response.put("price", course.getPrice());
+            response.put("isPublic", course.isPublic());
+            response.put("message", "Course successfully created for request");
+            
+            return ResponseEntity.ok(response);
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", ex.getMessage()));
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", ex.getMessage()));
+        }
+    }
+
+    @GetMapping("/{id}")
     public ResponseEntity<?> getCourseById(@PathVariable int id) {
         try {
             Course course = courseService.getCourseById(id);
@@ -240,40 +425,6 @@ public class CourseController {
             
             return dto;
         }).collect(Collectors.toList());
-    }
-      @PostMapping("/request/{courseRequestId}/teacher/{teacherId}")
-    public ResponseEntity<?> createCourseForRequest(@PathVariable int courseRequestId,
-                                                    @PathVariable int teacherId,
-                                                    @RequestBody CourseDTO courseDto) {
-        try {
-            Course course = courseService.createCourseForRequest(courseRequestId, teacherId, courseDto);
-            
-            // Convert to DTO to avoid serialization issues with lazy-loaded associations
-            CourseDTO responseDto = new CourseDTO();
-            responseDto.setTitle(course.getTitle());
-            responseDto.setDescription(course.getDescription());
-            responseDto.setPicture(course.getPicture());
-            responseDto.setPrice(course.getPrice());
-            responseDto.setTags(course.getTags());
-            
-            // Add course ID to the response
-            Map<String, Object> response = new HashMap<>();
-            response.put("id", course.getId());
-            response.put("title", course.getTitle());
-            response.put("description", course.getDescription());
-            response.put("picture", course.getPicture());
-            response.put("price", course.getPrice());
-            response.put("isPublic", course.isPublic());
-            response.put("message", "Course successfully created for request");
-            
-            return ResponseEntity.ok(response);
-        } catch (EntityNotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", ex.getMessage()));
-        } catch (IllegalStateException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", ex.getMessage()));
-        }
     }
       /**
      * Get all courses created from a user's "done" requests

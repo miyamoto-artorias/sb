@@ -1,11 +1,14 @@
 package com.demo.sb.dto;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 public class CourseDTO {
     private String title;
     private String description;
-    private String picture;
+    private String picture; // Used when returning a DTO or when not uploading new image
+    private MultipartFile pictureFile; // Used for file upload
     private float price;
     private List<Integer> categoryIds; // IDs of categories
     private List<String> tags; // Tags for the course
@@ -33,6 +36,14 @@ public class CourseDTO {
 
     public void setPicture(String picture) {
         this.picture = picture;
+    }
+
+    public MultipartFile getPictureFile() {
+        return pictureFile;
+    }
+
+    public void setPictureFile(MultipartFile pictureFile) {
+        this.pictureFile = pictureFile;
     }
 
     public float getPrice() {
