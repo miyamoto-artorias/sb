@@ -6,6 +6,7 @@ import com.demo.sb.entity.Student;
 import com.demo.sb.repository.CourseRepository;
 import com.demo.sb.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,10 +23,15 @@ public class StudentService {
 
     @Autowired
     private CourseRepository courseRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Transactional
     public StudentDto createStudent(StudentDto studentDto) {
         Student student = studentDto.toEntity();  // Convert DTO to entity
+        // Encrypt password
+        student.setPassword(passwordEncoder.encode(student.getPassword()));
         Student savedStudent = studentRepository.save(student);
         return StudentDto.fromEntity(savedStudent);  // Convert back to DTO
     }
@@ -35,7 +41,16 @@ public class StudentService {
         if (!studentRepository.existsById(studentDto.getId())) {
             throw new EntityNotFoundException("Student not found");
         }
+        
+        // Check if we're updating an existing student
+        Student existingStudent = studentRepository.findById(studentDto.getId()).orElse(null);
         Student student = studentDto.toEntity();  // Convert DTO to entity
+        
+        // Only encrypt the password if it's different from the stored one
+        if (existingStudent != null && !studentDto.getPassword().equals(existingStudent.getPassword())) {
+            student.setPassword(passwordEncoder.encode(student.getPassword()));
+        }
+        
         Student updatedStudent = studentRepository.save(student);
         return StudentDto.fromEntity(updatedStudent);  // Convert back to DTO
     }

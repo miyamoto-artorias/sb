@@ -21,7 +21,8 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
-
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody Map<String, String> credentials) {
@@ -36,8 +37,8 @@ public class AuthController {
 
         User user = userOptional.get();
 
-        // Compare plain text passwords
-        if (!password.equals(user.getPassword())) {
+        // Compare passwords using PasswordEncoder
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             return ResponseEntity.status(401).body("Invalid username or password");
         }
 
