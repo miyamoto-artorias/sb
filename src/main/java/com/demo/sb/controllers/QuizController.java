@@ -68,4 +68,17 @@ public class QuizController {
         List<QuizAttemptDto> attempts = attemptService.getQuizAttempts(quizId);
         return ResponseEntity.ok(attempts);
     }
+    
+    /**
+     * GET /api/chapters/{chapterId}/quizzes/{quizId}/attempts/user/{userId}
+     * Get all attempts by a specific user for a specific quiz
+     */
+    @GetMapping("/{quizId}/attempts/user/{userId}")
+    public ResponseEntity<List<QuizAttemptDto>> getUserQuizAttempts(
+            @PathVariable int chapterId,
+            @PathVariable Long quizId,
+            @PathVariable int userId) {
+        List<QuizAttemptDto> attempts = attemptService.getUserQuizAttempts(quizId, userId);
+        return ResponseEntity.ok(attempts);
+    }
 } 

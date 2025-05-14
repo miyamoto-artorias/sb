@@ -129,4 +129,18 @@ public class QuizAttemptService {
             .map(QuizAttemptDto::fromEntity)
             .collect(Collectors.toList());
     }
+    
+    /**
+     * Get all quiz attempts by a specific user for a specific quiz
+     * 
+     * @param quizId The ID of the quiz
+     * @param userId The ID of the user
+     * @return List of quiz attempt DTOs
+     */
+    public List<QuizAttemptDto> getUserQuizAttempts(Long quizId, int userId) {
+        return attemptRepository.findByUserIdAndQuizId(userId, quizId)
+            .stream()
+            .map(QuizAttemptDto::fromEntity)
+            .collect(Collectors.toList());
+    }
 } 
